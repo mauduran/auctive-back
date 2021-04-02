@@ -1,14 +1,18 @@
-const jwt = require("jsonwebtoken");
 
-let authMiddleware = function (req, res, next) {
+const tokenUtils = require('../utils/token.utils');
+const userUtils = require('../utils/user.utils');
+
+let authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ error: true, message: "Missing authorization header" })
 
     try {
-        //TODO: Find token in db
-        const verification = jwt.verify(tokenObj.token, process.env.TOKEN_SECRET)
+
+        tokenObj = await tokenUtils.findToken(token);
+
+        const verification = tokenUtils.verifyToken(token);
         if (verification) {
-            // TODO:  user = findUserById
+            user = userUtils.findUserById(userId);
 
             delete user.hash
             req._user = user
