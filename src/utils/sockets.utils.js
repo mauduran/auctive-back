@@ -35,6 +35,8 @@ const socketInit = (server) => {
 
         socket.on('removeConversation', async data => { });
 
+        socket.on('verificationRequest', async data => { });
+
         socket.on('newBid', async data => { });
 
         socket.on('buyNow', async data => { });
