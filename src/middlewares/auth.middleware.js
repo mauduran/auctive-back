@@ -5,13 +5,11 @@ let authMiddleware = function (req, res, next) {
     if (!token) return res.status(401).json({ error: true, message: "Missing authorization header" })
 
     try {
-
-        //Find token in db
-
+        //TODO: Find token in db
         const verification = jwt.verify(tokenObj.token, process.env.TOKEN_SECRET)
         if (verification) {
-            // return findUser
-            // user = findUser
+            // TODO:  user = findUserById
+
             delete user.hash
             req._user = user
             next()
