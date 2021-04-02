@@ -1,5 +1,3 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require('google-auth-library');
 
 
@@ -30,14 +28,6 @@ const getUser = async (req, res) => { }
 
 const updateUserProfilePic = async (req, res) => { }
 
-
-
-
-const signToken = (email) => {
-    return jwt.sign({
-        email
-    }, process.env.TOKEN_SECRET);
-}
 
 module.exports = {
     createUser,

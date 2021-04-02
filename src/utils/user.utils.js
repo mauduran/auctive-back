@@ -1,9 +1,5 @@
-const signToken = (email) => {
-    return jwt.sign({
-        email
-    }, process.env.TOKEN_SECRET);
-}
-const findToken = async (token) => { }
+const bcrypt = require("bcryptjs");
+const tokenUtils = require("./token.utils");
 
 const findUsers = async (query) => { }
 
@@ -20,7 +16,6 @@ const updateUserWithGoogleId = async (userId, googleId) => { }
 const updateUserProfilePic = async (userId, imageUrl) => { }
 
 module.exports = {
-    findToken,
     findUsers,
     findUserByEmail,
     findUserById,
