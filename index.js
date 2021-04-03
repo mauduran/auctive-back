@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const socketConfig = require('./src/utils/socket.utils');
+const socketConfig = require('./src/utils/sockets.utils');
 
 const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
@@ -11,6 +11,8 @@ const userRoute = require('./src/routes/user.route');
 if(process.env.NODE_ENV=='dev'){
     require('dotenv').config();
 }
+
+const app = express();
 
 const PORT = process.env.PORT || 3000;
 
@@ -25,7 +27,6 @@ app.use('/api/auctions', auctionsRoute);
 app.use('/api/user', userRoute);
 
 
-const app = express();
 
 const server = app.listen(PORT, () => {
     console.log("Server running on PORT " + PORT);
