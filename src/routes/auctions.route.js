@@ -14,3 +14,6 @@ router.route('/category/:category')
 router.route('/:id')
     .get(auctionsController.getAuctionById)
     .delete(auctionsController.removeAuctionById)
+
+
+module.exports = router ;

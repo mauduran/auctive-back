@@ -28,3 +28,6 @@ router.route('/profile-pic')
 
 router.route('/:id')
     .get(authMiddleware, userController.getUser);
+
+
+module.exports = router ;

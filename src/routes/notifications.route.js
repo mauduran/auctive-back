@@ -10,4 +10,6 @@ router.route('/')
     .delete(authMiddleware, notificationsController.deleteAllNotifications);
 
 router.route('/:id')
-    .delete(authMiddleware, userController.deleteNotification);
+    .delete(authMiddleware, notificationsController.deleteNotification);
+
+module.exports = router ;
