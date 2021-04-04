@@ -49,8 +49,6 @@ const removeToken = (email) => {
         });
 }
 
-const saveToken = async (userId, token) => { }
-
 const getUserFromToken = async (token) => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
@@ -86,7 +84,6 @@ const findToken = async (token) => { }
 
 module.exports = {
     signToken,
-    saveToken,
     removeToken,
     findToken,
     removeToken,

@@ -63,10 +63,6 @@ const findUserByEmail = (email) => {
 
 }
 
-const findUsers = async (query) => { }
-
-const deleteUser = async (userId) => { }
-
 const changePassword = async (email, newPassword) => {
     email = email.toLowerCase();
     let hash = await bcrypt.hash(newPassword, 10);
@@ -89,6 +85,10 @@ const changePassword = async (email, newPassword) => {
             return true;
         })
 }
+
+const findUsers = async (query) => { }
+
+const deleteUser = async (userId) => { }
 
 const updateUserWithGoogleId = async (userId, googleId) => { }
 
