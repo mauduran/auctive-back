@@ -7,6 +7,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 const createUser = async (name, email, password) => {
+    email = email.toLowerCase();
     let hash = await bcrypt.hash(password, 10);
 
     let user = {
@@ -22,7 +23,7 @@ const createUser = async (name, email, password) => {
     }
 
     params = {
-        TableName: 'auctive-table',
+        TableName: process.env.AWS_DYNAMODB_TABLE,
         Item: user,
         ConditionExpression: "attribute_not_exists(PK)"
     }
@@ -34,9 +35,36 @@ const createUser = async (name, email, password) => {
         });
 }
 
+const verifyCredentials = async (email, password) => {
+    try {
+        const user = await findUserByEmail(email);
+
+        const validCredentials = await bcrypt.compare(password, user.hash);
+
+        if (validCredentials) return Promise.resolve(true);
+
+        throw "Credentials not valid";
+
+    } catch (error) {
+        return Promise.reject("Could not validate credentials");
+    }
+}
 const findUsers = async (query) => { }
 
-const findUserByEmail = async (email) => { }
+const findUserByEmail = (email) => {
+    email = email.toLowerCase();
+    const params = {
+        TableName: process.env.AWS_DYNAMODB_TABLE,
+        Key: {
+            "PK": `USER#${email}`,
+            "SK": `#PROFILE#${email}`
+        }
+    }
+
+    return dynamoDB.get(params).promise()
+        .then(data => data.Item);
+
+}
 
 const findUserById = async (userId) => { }
 
@@ -53,6 +81,7 @@ module.exports = {
     findUsers,
     findUserByEmail,
     findUserById,
+    verifyCredentials,
     deleteUser,
     changePassword,
     updateUserWithGoogleId,
