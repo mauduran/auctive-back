@@ -28,7 +28,15 @@ const deleteNotification = async (req, res) => {
     }
 }
 
-const deleteAllNotifications = async (req, res) => { }
+const deleteAllNotifications = async (req, res) => {
+    try {
+        const deletedItems = await notificationUtils.deleteAllNotifications(req._user.email);
+        res.json({ success: true, documentsDeleted: deletedItems.length, message: "Notifications Deleted" });
+    } catch (error) {
+
+        res.status(400).json({ error: true, message: "Could not delete notifications." })
+    }
+}
 
 module.exports = {
     getNotifications,

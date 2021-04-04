@@ -37,7 +37,39 @@ const deleteNotification = async (email, notificationId) => {
         });
 }
 
-const deleteAllNotifications = async (email) => { }
+const deleteAllNotifications = async (email) => {
+    try {
+        let notifications = await getAllNotifications(email);
+
+        notifications = notifications.map(notification => ({
+            DeleteRequest: {
+                Key: {
+                    PK: notification.PK,
+                    SK: notification.SK
+                }
+            }
+        }));
+
+        let requests = [];
+        let batchSize = 25;
+
+        for (let i = 0; i < notifications.length; i += batchSize) {
+            let RequestItems = {}
+            RequestItems[`${process.env.AWS_DYNAMODB_TABLE}`] = notifications.slice(i, i + batchSize);
+            const params = {
+                RequestItems
+            }
+            requests.push(dynamoDB.batchWrite(params).promise());
+        }
+
+        return Promise.all(notifications);
+
+
+    } catch (error) {
+        console.log(error);
+        return Promise.reject("Could not delete notifications.");
+    }
+}
 
 module.exports = {
     generateNotification,
