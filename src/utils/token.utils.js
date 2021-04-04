@@ -29,8 +29,24 @@ const signToken = (email) => {
         });
 }
 
-const verifyToken = (token) => {
-    return jwt.verify(token, process.env.TOKEN_SECRET)
+const removeToken = (email) => {
+    params = {
+        TableName: process.env.AWS_DYNAMODB_TABLE,
+        Key: {
+            "PK": `USER#${email}`,
+            "SK": `#PROFILE#${email}`
+        },
+        UpdateExpression: "remove session_token",
+        ReturnValues: "UPDATED_NEW"
+    }
+
+    return dynamoDB.update(params).promise()
+        .then(user => {
+            return true;
+        })
+        .catch(err => {
+            return err;
+        });
 }
 
 const saveToken = async (userId, token) => { }
@@ -65,15 +81,14 @@ const getUserFromToken = async (token) => {
 
 }
 
-const removeToken = async (tokenId) => { }
 
 const findToken = async (token) => { }
 
 
 module.exports = {
     signToken,
-    verifyToken,
     saveToken,
+    removeToken,
     findToken,
     removeToken,
     getUserFromToken

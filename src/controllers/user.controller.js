@@ -56,7 +56,16 @@ const login = async (req, res) => {
 
 }
 
-const logOut = async (req, res) => { }
+const logOut = async (req, res) => {
+    const { email } = req._user;
+    try {
+        await tokenUtils.removeToken(email);
+        return res.json({ success: true, message: "Logged out" });
+    } catch (error) {
+        return res.status(400).json({ error: true, message: "Could not log out" });
+    }
+
+}
 
 const deleteUser = async (req, res) => { }
 
