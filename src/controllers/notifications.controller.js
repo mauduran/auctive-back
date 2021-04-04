@@ -1,5 +1,9 @@
 const notificationUtils = require('../utils/notification.utils');
 
+const createNotification = async (email, message, auctionId, auctionName, emitter) => {
+
+}
+
 const getNotifications = async (req, res) => {
     try {
         notifications = await notificationUtils.getAllNotifications(req._user.email);
@@ -41,5 +45,6 @@ const deleteAllNotifications = async (req, res) => {
 module.exports = {
     getNotifications,
     deleteNotification,
-    deleteAllNotifications
+    deleteAllNotifications,
+    createNotification
 }
