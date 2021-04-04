@@ -7,23 +7,14 @@ let authMiddleware = async (req, res, next) => {
     if (!token) return res.status(401).json({ error: true, message: "Missing authorization header" })
 
     try {
-
-        tokenObj = await tokenUtils.findToken(token);
-
-        const verification = tokenUtils.verifyToken(token);
-        if (verification) {
-            user = userUtils.findUserById(userId);
-
-            delete user.hash
-            req._user = user
-            next()
-        }
-
+        user = await tokenUtils.getUserFromToken(token);
+        req._user = user;
+        next();
     } catch (error) {
         res.status(401).json({
             error: true,
-            message: "Invalid Token!"
-        })
+            message: error
+        });
     }
 }
 module.exports = authMiddleware
