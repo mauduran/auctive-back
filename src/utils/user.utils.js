@@ -18,7 +18,7 @@ const createUser = async (name, email, password) => {
         name: name,
         email: email,
         is_admin: false,
-        hash: hash,
+        p_hash: hash,
         notifications: [],
     }
 
@@ -30,16 +30,14 @@ const createUser = async (name, email, password) => {
 
     return dynamoDB.put(params).promise()
         .then(res => {
-            delete user.hash;
+            delete user.p_hash;
             return user;
         });
 }
 
-const verifyCredentials = async (email, password) => {
+const verifyCredentials = async (hash, password) => {
     try {
-        const user = await findUserByEmail(email);
-
-        const validCredentials = await bcrypt.compare(password, user.hash);
+        const validCredentials = await bcrypt.compare(password, hash);
 
         if (validCredentials) return Promise.resolve(true);
 
@@ -49,7 +47,6 @@ const verifyCredentials = async (email, password) => {
         return Promise.reject("Could not validate credentials");
     }
 }
-const findUsers = async (query) => { }
 
 const findUserByEmail = (email) => {
     email = email.toLowerCase();
@@ -66,10 +63,33 @@ const findUserByEmail = (email) => {
 
 }
 
+const findUsers = async (query) => { }
 
 const deleteUser = async (userId) => { }
 
-const changePassword = async (userId, currentPassword, newPassword) => { }
+const changePassword = async (email, newPassword) => {
+    email = email.toLowerCase();
+    let hash = await bcrypt.hash(newPassword, 10);
+
+    params = {
+        TableName: process.env.AWS_DYNAMODB_TABLE,
+        Key: {
+            "PK": `USER#${email}`,
+            "SK": `#PROFILE#${email}`
+        },
+        UpdateExpression: "set p_hash = :p_hash",
+        ExpressionAttributeValues: {
+            ":p_hash": hash,
+        },
+        ReturnValues: "UPDATED_NEW"
+    }
+
+    return dynamoDB.update(params).promise()
+        .then(user => {
+            console.log(user);
+            return true;
+        })
+}
 
 const updateUserWithGoogleId = async (userId, googleId) => { }
 

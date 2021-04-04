@@ -47,7 +47,8 @@ const login = async (req, res) => {
     });
 
     try {
-        await userUtils.verifyCredentials(email, password);
+        const user = await userUtils.findUserByEmail(email);
+        await userUtils.verifyCredentials(user.p_hash, password);
         const token = await tokenUtils.signToken(email);
         return res.json({ success: true, token: token });
     } catch (error) {
@@ -71,7 +72,23 @@ const deleteUser = async (req, res) => { }
 
 const googleLogin = async (req, res) => { }
 
-const changePassword = function (req, res) { }
+const changePassword = async function (req, res) {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) return res.status(400).json({
+        error: true,
+        message: "Missing required fields"
+    });
+
+    try {
+        await userUtils.verifyCredentials(req._user.p_hash, currentPassword);
+        await userUtils.changePassword(req._user.email, newPassword);
+        res.json({success: true, message: "Password changed!"});
+    } catch (error) {
+        return res.status(400).json({ error: true, message: "Could not change password" });
+    }
+
+}
 
 const getProfileInfo = async (req, res) => { }
 
@@ -87,7 +104,7 @@ const getUser = async (req, res) => {
 
     try {
         user = await userUtils.findUserByEmail(email);
-        delete user.hash;
+        delete user.p_hash;
         delete user.session_token;
         return res.json({ success: true, user: user });
     } catch (error) {

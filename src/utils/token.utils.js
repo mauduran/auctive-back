@@ -70,7 +70,6 @@ const getUserFromToken = async (token) => {
 
         const verification = jwt.verify(user.session_token, process.env.TOKEN_SECRET);
         if (verification) {
-            delete user.hash;
             return Promise.resolve(user);
         }
         throw "Token is not valid";

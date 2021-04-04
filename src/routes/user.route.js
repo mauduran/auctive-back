@@ -20,7 +20,7 @@ router.route('/logout')
 router.route('/register')
     .post(userController.registerUser);
 
-router.route('/changePassword')
+router.route('/change-password')
     .post(authMiddleware, userController.changePassword);
 
 router.route('/profile-pic')
