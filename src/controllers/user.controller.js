@@ -1,4 +1,5 @@
 const { OAuth2Client } = require('google-auth-library');
+const userUtils = require('../utils/user.utils');
 
 
 if (process.env.NODE_ENV == 'dev') {
@@ -8,7 +9,31 @@ if (process.env.NODE_ENV == 'dev') {
 
 // const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-const createUser = (req, res) => { }
+const registerUser = async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        return res.status(400).json({
+            error: true,
+            message: "Missing required fields"
+        });
+    }
+
+    try {
+        const user = await userUtils.createUser(name, email.toLowerCase(), password);
+        return res.status(201).json({ success: true, user: user });
+
+    } catch (error) {
+        let message = "Could not process request.";
+        let status = 400;
+        if (error.code && error.code == "ConditionalCheckFailedException") {
+            status = 409;
+            message = "User already exists";
+        }
+        return res.status(status).json({ error: true, message: message });
+    }
+
+}
 
 const login = (req, res) => { }
 
@@ -30,7 +55,7 @@ const updateUserProfilePic = async (req, res) => { }
 
 
 module.exports = {
-    createUser,
+    registerUser,
     login,
     logOut,
     deleteUser,

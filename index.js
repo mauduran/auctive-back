@@ -25,7 +25,7 @@ app.use('/assets', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/notifications', notificationsRoute);
 app.use('/api/auctions', auctionsRoute);
-app.use('/api/user', userRoute);
+app.use('/api/users', userRoute);
 
 
 

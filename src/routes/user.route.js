@@ -18,7 +18,7 @@ router.route('/logout')
     .post(authMiddleware, userController.logOut);
 
 router.route('/register')
-    .post(userController.createUser);
+    .post(userController.registerUser);
 
 router.route('/changePassword')
     .post(authMiddleware, userController.changePassword);
