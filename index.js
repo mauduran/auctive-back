@@ -8,7 +8,7 @@ const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
 const userRoute = require('./src/routes/user.route');
 
-if(process.env.NODE_ENV=='dev'){
+if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
@@ -18,14 +18,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req,res)=>res.json("Welcome"));
+app.get('/', (req, res) => res.json("Welcome"));
 app.use('/assets', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/notifications', notificationsRoute);
 app.use('/api/auctions', auctionsRoute);
 app.use('/api/users', userRoute);
+
+app.use('*', (req, res) => {
+    res.status(404).json({ error: true, message: "Endpoint not found" });
+});
 
 
 
