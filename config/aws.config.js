@@ -1,19 +1,19 @@
-const AWS = require('aws-sdk');
+const aws = require('aws-sdk');
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
-AWS.config.update({
+aws.config.update({
     region: 'us-east-1',
 })
 
-const S3 = AWS.S3();
-const DynamoDB = AWS.DynamoDB();
-const APIGateway = AWS.APIGateway();
+const s3 = new aws.S3();
+const dynamoDB = new aws.DynamoDB.DocumentClient();
+const apiGateway = new aws.APIGateway();
 
 module.exports = {
-    AWS,
-    S3,
-    DynamoDB,
-    APIGateway
+    aws,
+    s3,
+    dynamoDB,
+    apiGateway
 }
