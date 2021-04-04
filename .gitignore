@@ -9,6 +9,9 @@ lerna-debug.log*
 #Mac Dir
 *.DS_Store
 
+#Docker
+Dockerfile.copy
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 

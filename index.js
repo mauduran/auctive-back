@@ -20,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+app.get('/', (req,res)=>res.json("Welcome"));
 app.use('/assets', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/notifications', notificationsRoute);
