@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-const tokenUtils = require("./token.utils");
 const { dynamoDB } = require("../../config/aws.config")
 
 if (process.env.NODE_ENV == 'dev') {
