@@ -26,8 +26,11 @@ router.route('/changePassword')
 router.route('/profile-pic')
     .put(authMiddleware, userController.updateUserProfilePic)
 
-router.route('/:id')
+router.route('/user')
+    .get(authMiddleware, userController.getMyUser);
+
+router.route('/:email')
     .get(authMiddleware, userController.getUser);
 
 
-module.exports = router ;
+module.exports = router;

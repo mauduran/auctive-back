@@ -1,11 +1,12 @@
 const { OAuth2Client } = require('google-auth-library');
 const userUtils = require('../utils/user.utils');
+const tokenUtils = require('../utils/token.utils');
 
+//  TODO: Have function to return missing fields response
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
-
 
 // const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
@@ -20,7 +21,7 @@ const registerUser = async (req, res) => {
     }
 
     try {
-        const user = await userUtils.createUser(name, email.toLowerCase(), password);
+        const user = await userUtils.createUser(name, email, password);
         return res.status(201).json({ success: true, user: user });
 
     } catch (error) {
@@ -35,7 +36,26 @@ const registerUser = async (req, res) => {
 
 }
 
-const login = (req, res) => { }
+const login = async (req, res) => {
+    let {
+        email,
+        password
+    } = req.body;
+
+    if (!password || !email) return res.status(400).json({
+        error: true,
+        message: "Missing required fields"
+    });
+
+    try {
+        await userUtils.verifyCredentials(email, password);
+        const token = await tokenUtils.signToken(email);
+        return res.json({ success: true, token: token });
+    } catch (error) {
+        res.status(400).json({ error: true, message: error });
+    }
+
+}
 
 const logOut = async (req, res) => { }
 
@@ -49,8 +69,27 @@ const getProfileInfo = async (req, res) => { }
 
 const getUsers = async (req, res) => { }
 
-const getUser = async (req, res) => { }
+const getUser = async (req, res) => {
+    const { email } = req.params;
 
+    if (!email) return res.status(400).json({
+        error: true,
+        message: "Missing required fields"
+    });
+
+    try {
+        user = await userUtils.findUserByEmail(email);
+        delete user.hash;
+        delete user.session_token;
+        return res.json({ success: true, user: user });
+    } catch (error) {
+        return res.status(status).json({ error: true, message: "Could not process request" });
+    }
+}
+
+const getMyUser = (req, res) => {
+    return res.json(req._user);
+}
 const updateUserProfilePic = async (req, res) => { }
 
 
@@ -64,5 +103,6 @@ module.exports = {
     getProfileInfo,
     getUser,
     getUsers,
-    updateUserProfilePic
+    updateUserProfilePic,
+    getMyUser
 }
