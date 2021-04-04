@@ -33,7 +33,6 @@ const registerUser = async (req, res) => {
         }
         return res.status(status).json({ error: true, message: message });
     }
-
 }
 
 const login = async (req, res) => {
@@ -90,6 +89,7 @@ const getUser = async (req, res) => {
 const getMyUser = (req, res) => {
     return res.json(req._user);
 }
+
 const updateUserProfilePic = async (req, res) => { }
 
 

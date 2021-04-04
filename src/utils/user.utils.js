@@ -66,7 +66,6 @@ const findUserByEmail = (email) => {
 
 }
 
-const findUserById = async (userId) => { }
 
 const deleteUser = async (userId) => { }
 
@@ -80,7 +79,6 @@ module.exports = {
     createUser,
     findUsers,
     findUserByEmail,
-    findUserById,
     verifyCredentials,
     deleteUser,
     changePassword,
