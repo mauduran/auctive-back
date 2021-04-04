@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  auctive-back:
+    container_name: auctive-rest-api
+    build: ./
+    command: npm run dev
+    working_dir: /usr/src/
+    environment:
+      PORT: ${PORT}
+      TOKEN_SECRET: ${TOKEN_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      CLOUD_SEARCH_ENDPOINT: ${CLOUD_SEARCH_ENDPOINT}
+
+    ports:
+      - "80:${PORT}"
