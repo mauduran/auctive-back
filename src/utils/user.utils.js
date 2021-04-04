@@ -86,7 +86,6 @@ const changePassword = async (email, newPassword) => {
 
     return dynamoDB.update(params).promise()
         .then(user => {
-            console.log(user);
             return true;
         })
 }
