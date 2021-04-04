@@ -14,4 +14,4 @@ services:
       CLOUD_SEARCH_ENDPOINT: ${CLOUD_SEARCH_ENDPOINT}
 
     ports:
-      - "80:${PORT}"
+      - "${HOST_PORT}:${PORT}"
