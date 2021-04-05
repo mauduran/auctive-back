@@ -1,5 +1,6 @@
 const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
+const redisAdapter = require('socket.io-redis');
 
 const socketInit = (server) => {
 
@@ -11,6 +12,9 @@ const socketInit = (server) => {
             credentials: true
         }
     });
+
+
+    io.adapter(redisAdapter({ host: 'auctive-socket-adapter.n3jprv.0001.use1.cache.amazonaws.com', port: 6379 }));
 
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
