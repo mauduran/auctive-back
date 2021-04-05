@@ -11,7 +11,6 @@ const create_cs_request = (id, record, operation) => {
         type: operation,
         id: id
     }
-
     if (operation == 'add') {
         let fields = {
             end_date: record.end_date.S,
@@ -21,7 +20,7 @@ const create_cs_request = (id, record, operation) => {
             starting_price: record.starting_price.N,
             buy_now_price: record.buy_now_price.N,
             category: record.category.S,
-            product_img_url: record.product_img_url.S,
+            product_img_urls: record.product_img_urls.L.map(url=>url.S),
             start_date: record.start_date.S,
             status: record.status.S
         };
