@@ -14,7 +14,7 @@ const socketInit = (server) => {
     });
 
 
-    io.adapter(redisAdapter({ host: 'auctive-socket-adapter.n3jprv.0001.use1.cache.amazonaws.com', port: 6379 }));
+    io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
 
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
