@@ -7,12 +7,15 @@ const socketConfig = require('./src/utils/sockets.utils');
 const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
 const userRoute = require('./src/routes/user.route');
+const auctionUtils = require('./src/utils/auction.utils');
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
 const app = express();
+
+auctionUtils.findAuctionsByCategory("Musica", 'sellado').then(()=>{}).catch(console.log)
 
 const PORT = process.env.PORT || 3000;
 
