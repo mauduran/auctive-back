@@ -106,8 +106,10 @@ const findUsers = async (query) => {
 //TODO: Delete lógico. Validar que no tenga ninguna subasta activa
 const deleteUser = async (userId) => { }
 
+//TODO: Basarse en proyecto de cloud drive
 const updateUserWithGoogleId = async (userId, googleId) => { }
 
+//TODO: Primero llamar lambda para guardar en bucket de S3 y luego actualizar documento de usuario
 const updateUserProfilePic = async (userId, imageUrl) => { }
 
 module.exports = {
