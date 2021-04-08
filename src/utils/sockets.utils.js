@@ -16,6 +16,7 @@ const socketInit = (server) => {
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
         const userId = socket.handshake.headers['userid'];
+        const userName = socket.handshake.headers['username'];
 
         socketUtils.addActiveUser(socket.id, userId);
 
