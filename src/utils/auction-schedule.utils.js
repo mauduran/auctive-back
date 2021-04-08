@@ -1,7 +1,8 @@
-
-const dateUtils = require('../utils/date.utils');
-const { dynamoDB } = require("../../config/aws.config")
 const schedule = require('node-schedule');
+
+const dateUtils = require('./date.utils');
+const { dynamoDB } = require("../../config/aws.config")
+const { notifyEndOfAuction } = require("./sockets.utils");
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
@@ -45,12 +46,14 @@ const setUpDailySchedule = () => {
 const scheduleAuctionClose = (auction) => {
     let date = new Date(auction.date);
 
-    if (auction.pending){
+    if (auction.pending) {
         if (date < new Date()) {
             // TODO: AuctionUtils.AuctionClose
+            notifyEndOfAuction(auction);
         }
         schedule.scheduleJob(auction.auction_id, date, () => {
             // TODO: AuctionUtils.AuctionClose (socketUtil)
+            notifyEndOfAuction(auction);
         })
     }
 
