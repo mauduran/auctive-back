@@ -3,19 +3,31 @@ const createConversation = async (auctionId, user, auctionOwner) => {
 
 }
 
-const leaveConversation = async (conversationId, userId) => { 
+const leaveConversation = async (conversationId, userId) => {
 
 }
 
-const addMessageToConversation = async (conversationId, message) => { 
+//TODO: Traer código del otro proyecto
+const getConversationById = async (conversationId, userId) => {
 
 }
 
-const getMessagesFromConversation = async(conversationId) => {
+//TODO: Traer código del otro proyecto
+const getConversations = async (email) => {
 
 }
 
-const deleteMessageFromConversation = async (conversationId, messageId) => { 
+
+const addMessageToConversation = async (conversationId, message) => {
+    
+}
+
+//TODO: Traer código del otro proyecto
+const getMessagesFromConversation = async (conversationId) => {
+
+}
+
+const deleteMessageFromConversation = async (conversationId, messageId) => {
 
 }
 
@@ -25,5 +37,7 @@ module.exports = {
     leaveConversation,
     addMessageToConversation,
     deleteMessageFromConversation,
-    getMessagesFromConversation
+    getMessagesFromConversation,
+    getConversationById,
+    getConversations
 }
