@@ -1,16 +1,29 @@
 
-const createConversation = async (auctionId, user, auctionOwner) => { }
+const createConversation = async (auctionId, user, auctionOwner) => {
 
-const leaveConversation= async (conversationId, userId) => { }
+}
 
-const addMessageToConversation = async (conversationId, message) => {}
+const leaveConversation = async (conversationId, userId) => { 
 
-const deleteMessageFromConversation = async (conversationId, messageId) => {}
+}
+
+const addMessageToConversation = async (conversationId, message) => { 
+
+}
+
+const getMessagesFromConversation = async(conversationId) => {
+
+}
+
+const deleteMessageFromConversation = async (conversationId, messageId) => { 
+
+}
 
 
 module.exports = {
     createConversation,
     leaveConversation,
     addMessageToConversation,
-    deleteMessageFromConversation
+    deleteMessageFromConversation,
+    getMessagesFromConversation
 }
