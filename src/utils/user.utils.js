@@ -12,13 +12,12 @@ const createUser = async (name, email, password) => {
     let user = {
         PK: `USER#${email}`,
         SK: `#PROFILE#${email}`,
-        joined: new Date().toISOString(),
+        joined: new Date(),
         is_verified: false,
         name: name,
         email: email,
         is_admin: false,
         p_hash: hash,
-        notifications: [],
     }
 
     params = {
@@ -85,8 +84,16 @@ const changePassword = async (email, newPassword) => {
         })
 }
 
-//TODO: Poner filter query para filtrar por email: includes(query) o  name: includes(query)
-const findUsers = async (query) => { 
+//TODO: Add phone number to user, requires auth middleware
+const addPhoneNumber = async (email, phoneNumber) => {
+
+}
+
+// TODO: Enable notifications to phone/email
+const enableNotifications = async () => { }
+
+//TODO: Have filter query to search by either email: includes(query) or name: includes(query)
+const findUsers = async (query) => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
         IndexName: 'email-index',
@@ -103,13 +110,13 @@ const findUsers = async (query) => {
     });
 }
 
-//TODO: Delete lógico. Validar que no tenga ninguna subasta activa
+//TODO: Logical Delete. Validate that is not currentBidder of any auctions and does not have any open auctions.
 const deleteUser = async (userId) => { }
 
-//TODO: Basarse en proyecto de cloud drive
+//TODO: Base this function on cloud drive project Check if theere is any changes for user creation with google
 const updateUserWithGoogleId = async (userId, googleId) => { }
 
-//TODO: Primero llamar lambda para guardar en bucket de S3 y luego actualizar documento de usuario
+//TODO: Call Lambda function to store profile pic in S3 then update user document with url
 const updateUserProfilePic = async (userId, imageUrl) => { }
 
 module.exports = {
@@ -120,5 +127,7 @@ module.exports = {
     deleteUser,
     changePassword,
     updateUserWithGoogleId,
-    updateUserProfilePic
+    updateUserProfilePic,
+    addPhoneNumber,
+    enableNotifications
 }

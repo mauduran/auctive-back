@@ -4,10 +4,10 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
+// TODO: Create notification. new DynamoDB document
+const createNotification = async (email, auctionId, auctionTitle, message, emitter) => {
 
-const createNotification = async (email, auctionId, message, file, emitter) => {
-    
- }
+}
 
 const getAllNotifications = (email) => {
     params = {
