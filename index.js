@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const schedule = require('node-schedule');
 
 const socketConfig = require('./src/utils/sockets.utils');
 
@@ -9,7 +8,7 @@ const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
 const userRoute = require('./src/routes/user.route');
 const categoriesRoute = require('./src/routes/categories.route');
-const scheduleUtils = require('./src/utils/auction_schedule.utils');
+const scheduleUtils = require('./src/utils/auction-schedule.utils');
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
