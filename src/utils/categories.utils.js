@@ -5,7 +5,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 
-const createCategory = (categoryName) => {
+const createCategory = async (categoryName) => {
     categoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
     let user = {
         PK: `CATEGORY`,
@@ -25,7 +25,7 @@ const createCategory = (categoryName) => {
 
 }
 
-const getAllCategories = () => {
+const getAllCategories = async () => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
         KeyConditionExpression: "PK = :pk  and begins_with (SK, :sk)",
