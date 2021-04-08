@@ -22,7 +22,7 @@ const getEventsForToday = () => {
         .then(data => {
 
             data.Items.forEach(item => {
-                closeAuction(item);
+                scheduleAuctionClose(item);
             });
 
             return data.Items;
@@ -42,15 +42,15 @@ const setUpDailySchedule = () => {
     schedule.scheduleJob("daily-schedule", rule, getEventsForToday);
 }
 
-const closeAuction = (auction) => {
+const scheduleAuctionClose = (auction) => {
     let date = new Date(auction.date);
 
     if (auction.pending){
         if (date < new Date()) {
-            // TODO: AuctionUtils.closeAuction
+            // TODO: AuctionUtils.AuctionClose
         }
         schedule.scheduleJob(auction.auction_id, date, () => {
-            // TODO: AuctionUtils.closeAuction
+            // TODO: AuctionUtils.AuctionClose (socketUtil)
         })
     }
 
@@ -60,5 +60,5 @@ module.exports = {
     getEventsForToday,
     setUpDailySchedule,
     cancelScheduledEvent,
-    closeAuction
+    scheduleAuctionClose
 }
