@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const schedule = require('node-schedule');
 
 const socketConfig = require('./src/utils/sockets.utils');
 
@@ -8,15 +9,12 @@ const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
 const userRoute = require('./src/routes/user.route');
 const categoriesRoute = require('./src/routes/categories.route');
-const auctionUtils = require('./src/utils/auction.utils');
-
+const scheduleUtils = require('./src/utils/auction_schedule.utils');
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
 const app = express();
-
-auctionUtils.findAuctionsByCategory("Musica", 'sellado').then(()=>{}).catch(console.log)
 
 const PORT = process.env.PORT || 3000;
 
@@ -36,6 +34,8 @@ app.use('*', (req, res) => {
     res.status(404).json({ error: true, message: "Endpoint not found" });
 });
 
+scheduleUtils.getEventsForToday();
+scheduleUtils.setUpDailySchedule();
 
 
 const server = app.listen(PORT, () => {
