@@ -88,12 +88,12 @@ const changePassword = async (email, newPassword) => {
 //TODO: Poner filter query para filtrar por email: includes(query) o  name: includes(query)
 const findUsers = async (query) => { 
     params = {
-        TableName: 'auctive-table',
+        TableName: process.env.AWS_DYNAMODB_TABLE,
         IndexName: 'email-index',
     }
 
     return new Promise((resolve, reject) => {
-        docClient.scan(params, (err, data) => {
+        dynamoDB.scan(params, (err, data) => {
             if (err) {
                 reject(err);
             } else {
