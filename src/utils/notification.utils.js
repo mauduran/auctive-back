@@ -5,7 +5,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 
-const generateNotification = async (email, auctionId, message, file, emitter) => {
+const createNotification = async (email, auctionId, message, file, emitter) => {
     
  }
 
@@ -76,7 +76,7 @@ const deleteAllNotifications = async (email) => {
 }
 
 module.exports = {
-    generateNotification,
+    createNotification,
     deleteNotification,
     deleteAllNotifications,
     getAllNotifications
