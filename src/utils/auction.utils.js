@@ -20,7 +20,7 @@ const findAuctionById = async (auctionId) => {
 
 }
 
-const findAuctionsByCategory = async (category, query='') => {
+const findAuctionsByCategory = async (category, query = '') => {
 
     params = {
         query: `category:'${category}, ${query}'`,
@@ -36,7 +36,11 @@ const findAuctionsByCategory = async (category, query='') => {
     return results;
 }
 
-const updateAuctionWithBid = async (auctionId, bid) => { }
+const updateAuctionWithBid = async (auctionId, ownerId, bid) => { }
+
+const buyNow = async (auctionId, bidder) => { }
+
+const subscribeToAuction = async (auctionId, email) => { }
 
 const deleteAuction = async (auctionId) => { }
 
@@ -49,5 +53,7 @@ module.exports = {
     findAuctionsByCategory,
     updateAuctionWithBid,
     deleteAuction,
-    updateAuction
+    updateAuction,
+    buyNow,
+    subscribeToAuction
 }
