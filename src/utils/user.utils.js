@@ -85,8 +85,25 @@ const changePassword = async (email, newPassword) => {
         })
 }
 
-const findUsers = async (query) => { }
+//TODO: Poner filter query para filtrar por email: includes(query) o  name: includes(query)
+const findUsers = async (query) => { 
+    params = {
+        TableName: 'auctive-table',
+        IndexName: 'email-index',
+    }
 
+    return new Promise((resolve, reject) => {
+        docClient.scan(params, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+}
+
+//TODO: Delete lógico. Validar que no tenga ninguna subasta activa
 const deleteUser = async (userId) => { }
 
 const updateUserWithGoogleId = async (userId, googleId) => { }
