@@ -1,44 +1,8 @@
-const { cloudSearch, dynamoDB } = require('../../config/aws.config');
+
 
 /*TODO: Create Auction, upload images to S3 bucket, then create document. 
 Add auction schedule to db. Schedule event to close auction when auction ends. */
 const createAuction = async (auction) => { }
-
-const findAuctions = async (query) => {
-    params = {
-        query,
-        size: 20
-
-    }
-    let result = await cloudSearch.search(params).promise();
-
-    const results = result.hits.hit;
-
-    results.forEach((el) => console.log(el));
-    return results;
-}
-
-//TODO: Get auction given id. EASY and fast to do.
-const findAuctionById = async (auctionId) => {
-
-}
-
-const findAuctionsByCategory = async (category, query = '') => {
-
-    params = {
-        query: `category:'${category}, ${query}'`,
-        queryParser: "lucene",
-        size: 20
-
-    }
-    let result = await cloudSearch.search(params).promise();
-
-    const results = result.hits.hit;
-
-    results.forEach((el) => console.log(el));
-    return results;
-}
-
 
 
 /* TODO: Given new bid check is it is greater than the current or if there is no current bid and that auction is open.
