@@ -5,6 +5,7 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
+//TODO: REMOVE (now in lambda function)
 const createUser = async (name, email, password) => {
     email = email.toLowerCase();
     let hash = await bcrypt.hash(password, 10);
@@ -33,6 +34,8 @@ const createUser = async (name, email, password) => {
         });
 }
 
+
+//TODO: REMOVE (now in lambda function)
 const verifyCredentials = async (hash, password) => {
     try {
         const validCredentials = await bcrypt.compare(password, hash);

@@ -10,6 +10,7 @@ if (process.env.NODE_ENV == 'dev') {
 
 // const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
+//TODO: REMOVE this controller (Included in Lambda function.)
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -35,6 +36,9 @@ const registerUser = async (req, res) => {
     }
 }
 
+
+
+//TODO: REMOVE this controller (Included in Lambda function.)
 const login = async (req, res) => {
     let {
         email,
