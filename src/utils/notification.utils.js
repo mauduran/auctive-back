@@ -4,7 +4,10 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
-const generateNotification = async (email, auctionId, message, file, emitter) => { }
+
+const generateNotification = async (email, auctionId, message, file, emitter) => {
+    
+ }
 
 const getAllNotifications = (email) => {
     params = {
@@ -22,6 +25,7 @@ const getAllNotifications = (email) => {
         });
 }
 
+//TODO: Include #NOTIFICATION# in notificationId
 const deleteNotification = async (email, notificationId) => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,

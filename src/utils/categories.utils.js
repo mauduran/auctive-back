@@ -7,13 +7,11 @@ if (process.env.NODE_ENV == 'dev') {
 
 const createCategory = (categoryName) => {
     categoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-
     let user = {
         PK: `CATEGORY`,
         SK: `#CATEGORY#${categoryName}`,
         category_name: categoryName
     }
-
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
         Item: user,

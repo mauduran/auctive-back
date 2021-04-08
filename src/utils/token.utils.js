@@ -2,6 +2,9 @@ const jwt = require("jsonwebtoken");
 
 const { dynamoDB } = require("../../config/aws.config")
 
+// TODO: Check if tokens really need to be stored in db.
+// TODO: If db is necessary check wether redis db is worth it compared to dynamo (for tokens only)
+
 const signToken = (email) => {
     const token = jwt.sign({
         email
@@ -79,13 +82,10 @@ const getUserFromToken = async (token) => {
 }
 
 
-const findToken = async (token) => { }
-
 
 module.exports = {
     signToken,
     removeToken,
-    findToken,
     removeToken,
     getUserFromToken
 }
