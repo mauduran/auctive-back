@@ -1,6 +1,5 @@
 const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
-const redisAdapter = require('socket.io-redis');
 
 const socketInit = (server) => {
 
@@ -12,9 +11,6 @@ const socketInit = (server) => {
             credentials: true
         }
     });
-
-
-    io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
 
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
