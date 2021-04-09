@@ -5,37 +5,9 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
-//TODO: REMOVE (now in lambda function)
-const createUser = async (name, email, password) => {
-    email = email.toLowerCase();
-    let hash = await bcrypt.hash(password, 10);
-
-    let user = {
-        PK: `USER#${email}`,
-        SK: `#PROFILE#${email}`,
-        joined: new Date(),
-        is_verified: false,
-        name: name,
-        email: email,
-        is_admin: false,
-        p_hash: hash,
-    }
-
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        Item: user,
-        ConditionExpression: "attribute_not_exists(PK)"
-    }
-
-    return dynamoDB.put(params).promise()
-        .then(res => {
-            delete user.p_hash;
-            return user;
-        });
-}
 
 
-//TODO: REMOVE (now in lambda function)
+//TODO: REMOVE (now in lambda function) //Don't remove yet
 const verifyCredentials = async (hash, password) => {
     try {
         const validCredentials = await bcrypt.compare(password, hash);
@@ -49,6 +21,7 @@ const verifyCredentials = async (hash, password) => {
     }
 }
 
+//TODO: REMOVE Should remove later
 const findUserByEmail = (email) => {
     email = email.toLowerCase();
     const params = {

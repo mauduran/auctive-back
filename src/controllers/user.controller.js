@@ -10,56 +10,6 @@ if (process.env.NODE_ENV == 'dev') {
 
 // const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-//TODO: REMOVE this controller (Included in Lambda function.)
-const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-        return res.status(400).json({
-            error: true,
-            message: "Missing required fields"
-        });
-    }
-
-    try {
-        const user = await userUtils.createUser(name, email, password);
-        return res.status(201).json({ success: true, user: user });
-
-    } catch (error) {
-        let message = "Could not process request.";
-        let status = 400;
-        if (error.code && error.code == "ConditionalCheckFailedException") {
-            status = 409;
-            message = "User already exists";
-        }
-        return res.status(status).json({ error: true, message: message });
-    }
-}
-
-
-
-//TODO: REMOVE this controller (Included in Lambda function.)
-const login = async (req, res) => {
-    let {
-        email,
-        password
-    } = req.body;
-
-    if (!password || !email) return res.status(400).json({
-        error: true,
-        message: "Missing required fields"
-    });
-
-    try {
-        const user = await userUtils.findUserByEmail(email);
-        await userUtils.verifyCredentials(user.p_hash, password);
-        const token = await tokenUtils.signToken(email);
-        return res.json({ success: true, token: token });
-    } catch (error) {
-        res.status(400).json({ error: true, message: error });
-    }
-
-}
 
 const logOut = async (req, res) => {
     const { email } = req._user;
