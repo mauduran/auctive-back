@@ -25,7 +25,7 @@ const updateAuctionWithBid = async (auctionId, ownerId, newBid, bidderEmail) => 
     // }
 }
 
-// TODO: Check if auction is open, if it is update the auction document and close auction. (Cancel scheduled closing)
+// TODO: Check if auction is open, if it is update the auction document and close auction. Set bidder (Cancel scheduled closing)
 const buyNow = async (auctionId, bidder) => { }
 
 // TODO: Add user email to array of interested people on auction.

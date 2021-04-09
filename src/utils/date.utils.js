@@ -1,3 +1,5 @@
+//TODO: Move this to lambdas?
+
 const isToday = (date) => {
     const today = new Date()
     return date.getDate() == today.getDate() &&

@@ -1,8 +1,3 @@
-
-const getAuctions = async (req, res) => { }
-
-const getAuctionsByCategory = async (req, res) => { }
-
 const getAuctionById = async (req, res) => { }
 
 const removeAuctionById = async (req, res) => { }

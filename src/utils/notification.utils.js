@@ -9,6 +9,7 @@ const createNotification = async (email, auctionId, auctionTitle, message, emitt
 
 }
 
+// TODO: REMOVE. Move this to lambda.
 const getAllNotifications = (email) => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
@@ -25,7 +26,7 @@ const getAllNotifications = (email) => {
         });
 }
 
-//TODO: Include #NOTIFICATION# in notificationId
+//TODO: REMOVE: Move this to lambda. Include #NOTIFICATION# in notificationId
 const deleteNotification = async (email, notificationId) => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
@@ -41,6 +42,7 @@ const deleteNotification = async (email, notificationId) => {
         });
 }
 
+//TODO: REMOVE: Move this to lambda.
 const deleteAllNotifications = async (email) => {
     try {
         let notifications = await getAllNotifications(email);

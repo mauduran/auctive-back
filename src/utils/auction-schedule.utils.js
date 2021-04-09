@@ -8,6 +8,8 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
+
+//TODO: Create Lambda to get scheduled actions from dynamodb and remove from here
 const getEventsForToday = () => {
     let date = dateUtils.getTodayString();
 

@@ -1,6 +1,7 @@
 
 const userUtils = require('../utils/user.utils');
 
+//TODO: This will also be replaced by lambdas.
 let userInfoMiddleware = async (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ error: true, message: "Missing authorization header" })
