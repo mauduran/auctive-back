@@ -63,6 +63,29 @@ const changePassword = async (email, newPassword) => {
 //TODO: Add phone number to user, requires auth middleware
 const addPhoneNumber = async (email, phoneNumber) => {
 
+    let params = {
+        TableName: process.env.AWS_DYNAMODB_TABLE,
+        Key: {
+            "PK": `USER#${email}`,
+            "SK": `#PROFILE#${email}`
+        },
+        UpdateExpression: "set phone_number = :phone_number",
+        ExpressionAttributeValues: {
+            ":phone_number": phoneNumber,
+        },
+        ReturnValues: "UPDATED_NEW",
+        IndexName: 'email-index',
+    }
+
+    return new Promise((resolve, reject) => {
+        dynamoDB.update(params, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
 }
 
 // TODO: Enable notifications to phone/email
@@ -70,9 +93,19 @@ const enableNotifications = async () => { }
 
 //TODO: Have filter query to search by either email: includes(query) or name: includes(query)
 const findUsers = async (query) => {
-    params = {
+    
+    let params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
         IndexName: 'email-index',
+        FilterExpression : 'contains (#user_email, :user_email) OR contains (#user_name, :user_name)',
+        ExpressionAttributeNames: {
+            "#user_email": "email",
+            "#user_name": "name",
+        },
+        ExpressionAttributeValues: {
+            ":user_email": query,
+            ":user_name": query,
+        }       
     }
 
     return new Promise((resolve, reject) => {
