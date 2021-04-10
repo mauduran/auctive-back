@@ -7,7 +7,6 @@ const socketConfig = require('./src/utils/sockets.utils');
 const notificationsRoute = require('./src/routes/notifications.route');
 const auctionsRoute = require('./src/routes/auctions.route');
 const userRoute = require('./src/routes/user.route');
-const categoriesRoute = require('./src/routes/categories.route');
 const scheduleUtils = require('./src/utils/auction-schedule.utils');
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
@@ -27,13 +26,12 @@ app.use('/assets', express.static(path.join(__dirname, 'public')));
 app.use('/api/auctions', auctionsRoute);
 app.use('/api/user/notifications', notificationsRoute);
 app.use('/api/users', userRoute);
-app.use('/api/categories', categoriesRoute);
 
 app.use('*', (req, res) => {
     res.status(404).json({ error: true, message: "Endpoint not found" });
 });
 
-scheduleUtils.getEventsForToday();
+scheduleUtils.getEventsForToday().then(console.log);
 scheduleUtils.setUpDailySchedule();
 
 
