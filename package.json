@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=dev node .",
-    "dev": "NODE_ENV=dev nodemon ."
+    "start": "SET NODE_ENV=dev node .",
+    "dev": "SET NODE_ENV=dev nodemon .",
+    "dev2": "SET NODE_ENV=dev nodemon index.js"
   },
   "repository": {
     "type": "git",
