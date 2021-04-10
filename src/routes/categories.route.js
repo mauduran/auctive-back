@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.route('/')
     .get(categoriesController.getCategories)
-    .post(authMiddleware, categoriesController.addCategory);
 
 
 router.route('/:id')
