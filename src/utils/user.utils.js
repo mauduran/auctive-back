@@ -96,7 +96,6 @@ const updateUserWithGoogleId = async (userId, googleId) => { }
 const updateUserProfilePic = async (userId, imageUrl) => { }
 
 module.exports = {
-    createUser,
     findUsers,
     findUserByEmail,
     verifyCredentials,

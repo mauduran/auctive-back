@@ -40,8 +40,6 @@ const updateAuction = async (auctionId, auction) => { }
 module.exports = {
     createAuction,
     findAuctions,
-    findAuctionById,
-    findAuctionsByCategory,
     updateAuctionWithBid,
     deleteAuction,
     updateAuction,
