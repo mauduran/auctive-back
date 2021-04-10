@@ -4,27 +4,6 @@ if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
-
-const createCategory = async (categoryName) => {
-    categoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-    let user = {
-        PK: `CATEGORY`,
-        SK: `#CATEGORY#${categoryName}`,
-        category_name: categoryName
-    }
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        Item: user,
-        ConditionExpression: "attribute_not_exists(SK)"
-    }
-
-    return dynamoDB.put(params).promise()
-        .then(res => {
-            return res;
-        });
-
-}
-
 const getAllCategories = async () => {
     params = {
         TableName: process.env.AWS_DYNAMODB_TABLE,
@@ -58,8 +37,6 @@ const deleteCategory = async (categoryId) => {
 
 
 module.exports = {
-    createCategory,
     getAllCategories,
     deleteCategory
-
 }

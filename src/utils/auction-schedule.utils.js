@@ -1,5 +1,5 @@
 const schedule = require('node-schedule');
-
+const axios = require('axios');
 const dateUtils = require('./date.utils');
 const { dynamoDB } = require("../../config/aws.config")
 const { notifyEndOfAuction } = require("./sockets.utils");
@@ -9,28 +9,28 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 
-//TODO: Create Lambda to get scheduled actions from dynamodb and remove from here
 const getEventsForToday = () => {
     let date = dateUtils.getTodayString();
 
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        KeyConditionExpression: "PK = :pk  and begins_with (SK, :sk)",
-        ExpressionAttributeValues: {
-            ":pk": "SCHEDULED_ACTION#",
-            ":sk": `#DATE#${date}`
-        },
-    }
-    return dynamoDB.query(params).promise()
-        .then(data => {
+    headers = { 'Content-Type': 'application/json', 'X-API-KEY': process.env.SERVERLESS_API_KEY }
 
-            data.Items.forEach(item => {
+    const configParams = {
+        headers
+    }
+    return axios.get(`${process.env.API_GATEWAY_URL}/scheduled-actions`, configParams)
+        .then(res => {
+            const data = res.data;
+            data.items.forEach(item => {
                 scheduleAuctionClose(item);
             });
-
-            return data.Items;
-        });
+            return data.items;
+        })
+        .catch(err => {
+            console.error(err);
+        })
 }
+
+
 
 const cancelScheduledEvent = (auctionId) => {
     schedule.scheduledJobs[auctionId].cancel();
@@ -40,7 +40,7 @@ const cancelScheduledEvent = (auctionId) => {
 const setUpDailySchedule = () => {
     const rule = new schedule.RecurrenceRule();
     rule.hour = 0;
-    rule.tz = 'America/Mexico_City';
+    rule.tz = 'America/New_York';
 
     schedule.scheduleJob("daily-schedule", rule, getEventsForToday);
 }

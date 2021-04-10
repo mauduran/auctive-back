@@ -74,8 +74,6 @@ const updateUserProfilePic = async (req, res) => { }
 
 
 module.exports = {
-    // registerUser,
-    // login,
     logOut,
     deleteUser,
     googleLogin,

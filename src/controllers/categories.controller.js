@@ -34,32 +34,7 @@ const deleteCategoryById = async (req, res) => {
     }
 }
 
-const addCategory = async (req, res) => {
-    const { categoryName } = req.body;
-
-    if (!categoryName) return res.status(400).json({
-        error: true,
-        message: "Missing required fields"
-    });
-
-    if(!req._user.is_admin) return res.status(401).json({
-        error: true,
-        message: "Not authorized to do this operation."
-    });
-
-    try {
-        await categoriesUtils.createCategory(categoryName);
-
-        res.json({ success: true, message: `Category ${categoryName} created` });
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({ error: true, message: "Couldn't create category" });
-    }
-
-}
-
 module.exports = {
     getCategories,
     deleteCategoryById,
-    addCategory
 }
