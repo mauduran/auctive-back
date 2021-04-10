@@ -44,9 +44,27 @@ const changePassword = async function (req, res) {
 
 }
 
-const getProfileInfo = async (req, res) => { }
+const getProfileInfo = async (req, res) => { 
+    
+}
 
-const getUsers = async (req, res) => { }
+const getUsers = async (req, res) => {
+    const query = req.query.query;
+    if(!query) return res.status(400).json({
+        error: true,
+        message: "Missing required fields"
+    });
+
+    try {
+        let users = await userUtils.findUsers(query);
+        return res.json({success: true, message: "Here is    a user list", data : users});
+
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: true, message: "Could not get users!" });
+ 
+    }
+ }
 
 const getUser = async (req, res) => {
     const { email } = req.params;
@@ -72,6 +90,23 @@ const getMyUser = (req, res) => {
 
 const updateUserProfilePic = async (req, res) => { }
 
+const updateUserPhoneNumber = async (req, res) => { 
+    const { email, phoneNumber } = req.body;
+
+    if (!email || !phoneNumber) return res.status(400).json({
+        error: true,
+        message: "Missing required fields"
+    });
+
+    try {
+        let user_update = await userUtils.addPhoneNumber(email, phoneNumber);
+        return res.json({success: true, message: "Phone number changed!", user : user_update});
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: true, message: "Could not change phone number" });
+    }
+}
+
 
 module.exports = {
     logOut,
@@ -82,5 +117,6 @@ module.exports = {
     getUser,
     getUsers,
     updateUserProfilePic,
-    getMyUser
+    getMyUser,
+    updateUserPhoneNumber
 }
