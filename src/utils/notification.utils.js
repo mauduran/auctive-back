@@ -1,4 +1,7 @@
 const { dynamoDB } = require("../../config/aws.config")
+const { v4: uuidv4 } = require('uuid');
+
+
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
@@ -6,6 +9,32 @@ if (process.env.NODE_ENV == 'dev') {
 
 // TODO: Create notification. new DynamoDB document
 const createNotification = async (email, auctionId, auctionTitle, message, emitter) => {
+
+    let notification = {
+        PK: `USER#${email}`,
+        SK: `#NOTIFICATION#${uuidv4()}`,
+        auctionId: auctionId,
+        auctionTitle: auctionTitle,
+        message: message,
+        date: new Date().toUTCString(),
+        emitter: emitter
+    }
+
+    params = {
+        TableName: process.env.AWS_DYNAMODB_TABLE,
+        ConditionExpression: "attribute_not_exists(PK)",
+        Item: notification
+    }
+
+      return new Promise((resolve, reject) => {
+        dynamoDB.put(params, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
 
 }
 
