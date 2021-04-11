@@ -19,25 +19,6 @@ const addMessageToConversation = async (conversationId, message, senderEmail, se
 
 }
 
-//TODO: Test functionality and consider including "#CONVERSATION#" in the conversationId
-const getConversationById = async (conversationId, userEmail) => {
-    //Validate user is in conversation with filter query
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        IndexName: 'reverse-index',
-        KeyConditionExpression: "SK = :sk  and begins_with (PK, :pk)",
-        ExpressionAttributeValues: {
-            ":pk": `AUCTION#`,
-            ":sk": `#CONVERSATION#${conversationId}`
-        },
-    }
-    return dynamoDB.query(params).promise()
-        .then(data => {
-            if (data.Items.length) return data.Items[0];
-            throw "Could not find conversation"
-        });
-}
-
 
 //TODO: Test functionality and consider including "#CONVERSATION#" in the conversationId
 const getMessagesFromConversation = async (conversationId) => {
