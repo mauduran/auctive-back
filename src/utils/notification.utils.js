@@ -9,10 +9,11 @@ if (process.env.NODE_ENV == 'dev') {
 
 // TODO: Create notification. new DynamoDB document
 const createNotification = async (email, auctionId, auctionTitle, message, emitter) => {
-
+    let notificationId = uuidv4();
     let notification = {
         PK: `USER#${email}`,
-        SK: `#NOTIFICATION#${uuidv4()}`,
+        SK: `#NOTIFICATION#${notificationId}`,
+        notification_id: notificationId,
         auctionId: auctionId,
         auctionTitle: auctionTitle,
         message: message,
