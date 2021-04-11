@@ -38,38 +38,6 @@ const getConversationById = async (conversationId, userEmail) => {
         });
 }
 
-//TODO: Test functionality
-const getConversations = async (email) => {
-    params_1 = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        IndexName: 'seller_email-index',
-        KeyConditionExpression: "seller_email = :seller_email",
-        ExpressionAttributeValues: {
-            ":seller_email": email
-        },
-    }
-
-    params_2 = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        IndexName: 'bidder_email-index',
-        KeyConditionExpression: "bidder_email = :bidder_email",
-        ExpressionAttributeValues: {
-            ":bidder_email": email
-        },
-    }
-
-    let conversations = [];
-
-    return dynamoDB.query(params_1).promise()
-        .then(data => {
-            conversations.push(...data.Items);
-            return dynamoDB.query(params_2).promise()
-        })
-        .then(data => {
-            conversations.push(...data.Items);
-            return conversations;
-        });
-}
 
 //TODO: Test functionality and consider including "#CONVERSATION#" in the conversationId
 const getMessagesFromConversation = async (conversationId) => {
