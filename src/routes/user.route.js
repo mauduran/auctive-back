@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.route('/')
     .get(authMiddleware, userController.getUsers)
-    .post(authMiddleware, userController.updateUserPhoneNumber)
+    .put(authMiddleware, userController.updateUserPhoneNumber)
     .delete(authMiddleware, userController.deleteUser);
 
 router.route('/login/google')
