@@ -39,22 +39,7 @@ const createNotification = async (email, auctionId, auctionTitle, message, emitt
 
 }
 
-// TODO: REMOVE. Move this to lambda.
-const getAllNotifications = (email) => {
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        KeyConditionExpression: "PK = :pk  and begins_with (SK, :sk)",
-        ExpressionAttributeValues: {
-            ":pk": `USER#${email}`,
-            ":sk": '#NOTIFICATION#'
-        },
-    }
 
-    return dynamoDB.query(params).promise()
-        .then(data => {
-            return data.Items;
-        });
-}
 
 //TODO: REMOVE: Move this to lambda. Include #NOTIFICATION# in notificationId
 const deleteNotification = async (email, notificationId) => {
