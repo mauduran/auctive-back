@@ -19,21 +19,6 @@ const addMessageToConversation = async (conversationId, message, senderEmail, se
 
 }
 
-
-//TODO: Test functionality and consider including "#CONVERSATION#" in the conversationId
-const getMessagesFromConversation = async (conversationId) => {
-    params = {
-        TableName: process.env.AWS_DYNAMODB_TABLE,
-        KeyConditionExpression: "PK = :pk  and begins_with (SK, :sk)",
-        ExpressionAttributeValues: {
-            ":pk": `#CONVERSATION#${id}`,
-            ":sk": '#MESSAGE#'
-        },
-    }
-    return dynamoDB.query(params).promise()
-        .then(data => data.Items);
-}
-
 //TODO: Borrado Lógico. Los usuarios verán "Mensaje eliminado"
 const deleteMessageFromConversation = async (conversationId, messageId, userEmail) => {
 
