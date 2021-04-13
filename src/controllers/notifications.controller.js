@@ -1,15 +1,16 @@
 const notificationUtils = require('../utils/notification.utils');
 
 const createNotification = async (req, res) => {
-    const { email,  message, auctionId, auctionName, emitter } = req.body;
+    const {  email,  message, auctionId, auctionTitle } = req.body;
 
-    if (!email ||  !message || !auctionId || !auctionName || !emitter) return res.status(400).json({
+    if (!email ||  !message || !auctionId || !auctionTitle) return res.status(400).json({
         error: true,
         message: "Missing required fields"
     });
 
+    const emitter = req._user.email;
     try {
-        let new_notification =  await notificationUtils.createNotification(email, message, auctionId, auctionName, emitter);
+        let new_notification =  await notificationUtils.createNotification(email, message, auctionId, auctionTitle, emitter);
         console.log(new_notification);
         return res.json({ success: true, message: "Notification created!"});
 
@@ -31,8 +32,7 @@ const deleteAllNotifications = async (req, res) => {
 }
 
 module.exports = {
-    getNotifications,
-    deleteNotification,
+
     deleteAllNotifications,
     createNotification
 }
