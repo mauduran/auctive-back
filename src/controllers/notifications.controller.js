@@ -11,7 +11,7 @@ const createNotification = async (req, res) => {
     try {
         let new_notification =  await notificationUtils.createNotification(email, message, auctionId, auctionName, emitter);
         console.log(new_notification);
-        return res.json({ success: true, message: "Notification created!", notification: new_notification});
+        return res.json({ success: true, message: "Notification created!"});
 
     } catch (error) {
         console.error(error);
