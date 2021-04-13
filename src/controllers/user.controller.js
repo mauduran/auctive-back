@@ -91,12 +91,18 @@ const getMyUser = (req, res) => {
 const updateUserProfilePic = async (req, res) => { }
 
 const updateUserPhoneNumber = async (req, res) => { 
-    const { email, phoneNumber } = req.body;
-
+    const email = req._user.email;
+    const {phoneNumber} = req.body;
+    
     if (!email || !phoneNumber) return res.status(400).json({
         error: true,
         message: "Missing required fields"
     });
+
+    let regex = /^(\+{0,})(\d{0,})([(]{1}\d{1,3}[)]{0,}){0,}(\s?\d+|\+\d{2,3}\s{1}\d+|\d+){1}[\s|-]?\d+([\s|-]?\d+){1,2}(\s){0,}$/gm;
+
+    
+    if(!regex.test(phoneNumber)) return res.status(400).json({error: true, message: "Invalid phone number"});
 
     try {
         let user_update = await userUtils.addPhoneNumber(email, phoneNumber);
