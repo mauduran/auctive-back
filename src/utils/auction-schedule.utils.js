@@ -1,7 +1,6 @@
 const schedule = require('node-schedule');
 const axios = require('axios');
 const dateUtils = require('./date.utils');
-const { dynamoDB } = require("../../config/aws.config")
 const { notifyEndOfAuction } = require("./sockets.utils");
 
 if (process.env.NODE_ENV == 'dev') {
@@ -29,7 +28,6 @@ const getEventsForToday = () => {
             console.error(err);
         })
 }
-
 
 
 const cancelScheduledEvent = (auctionId) => {

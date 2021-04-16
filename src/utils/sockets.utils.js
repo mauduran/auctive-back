@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
 
@@ -15,17 +16,22 @@ const socketInit = (server) => {
 
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
-        const userId = socket.handshake.headers['userid'];
-        const userName = socket.handshake.headers['username'];
+        const userEmail = socket.handshake.headers['userEmail'];
 
-        socketUtils.addActiveUser(socket.id, userId);
+        socketUtils.addActiveUser(socket.id, userEmail);
 
+        const verification = jwt.verify(user.session_token, process.env.TOKEN_SECRET);
         // TODO: Check is user is Admin and join admin room.
+        if(verification.is_admin){
+            socket.join('admin');
+        } else {
+            // Get user auctions and conversations
+            //TODO: Join Auction rooms and conversations
+        }
 
-        //TODO: if not user, join all auction rooms
 
         socket.on('disconnect', () => {
-            socketUtils.removeActiveUser(userId);
+            socketUtils.removeActiveUser(userEmail);
             console.log('Client disconnected');
         });
 
@@ -34,13 +40,9 @@ const socketInit = (server) => {
          Admin - New verification request
          User - Change on verification status.
          User - New conversation
-         User - New Bid on Auction
-         Owner - New Bid on Auction
-         User - Buy now event
-         Owner - Buy now event
-         Owner - End of auction (Expired, Closed)
-         User - End of auction
-         AuctionWinner - End of auction (bid won)
+         User/Owner - New Bid on Auction
+         User/Owner - Buy now event
+         Owner/AuctionWinner - End of auction (Expired, Closed)
         */
         socket.on('verify', async data => {
             //Update dynamodb document.
@@ -49,21 +51,14 @@ const socketInit = (server) => {
         });
 
         socket.on('verificationRequest', async data => {
-            //Add image to S3 bucket.
-            //Add or update dynamodb document.
-            //Remove old image from S3 bucket if any
+            //After creating verificationRequest with lambda S3 image and dynamodb doc.
             //Emit to admin room
-
         });
 
         socket.on('message', async data => {
             //Add message document to dynamoDB
+            //Add message as last message on conversation Document (this two on same lambda)
             //Emit message to user 
-        });
-
-        socket.on('deleteMessage', async data => {
-            //Update message document to dynamoDB
-            //Emit message to user
         });
 
         socket.on('createConversation', async data => {
@@ -72,24 +67,22 @@ const socketInit = (server) => {
             //Emit notification to user.
         });
 
-        socket.on('removeConversation', async data => { 
-            //Update conversation document (remove seller or bidder)
-            //SEND message to other USER 'user has left conversation'
+        socket.on('subscribeToConversation', async data => {
+
         });
 
-
-        socket.on('subscribeToAuction', async data => { 
-            //Update conversation document (Add user to Array if not there already)
+        socket.on('subscribeToAuction', async data => {
+            //Call subscribeToAuctionLambda
             //Join auction room
         });
 
         socket.on('newBid', async data => {
-            //Update conversation document with new bid and email of biddder
+            //Update auction document with new bid and email of biddder
             //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
         });
 
         socket.on('buyNow', async data => {
-            //Update conversation document with bidWinner and change status to closed
+            //Update auction document with bidWinner and change status to closed
             //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
         });
     });
