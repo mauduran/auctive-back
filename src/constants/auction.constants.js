@@ -1,9 +1,7 @@
-//TODO: Move this to lambdas?
-
 const AUCTION_STATUS = {
-    ACTIVE: "active",
-    INACTIVE: "inactive",
-    CLOSED: "closed"
+    OPEN: "OPEN",
+    EXPIRED: "EXPIRED",
+    CLOSED: "CLOSED"
 }
 
 module.exports = {
