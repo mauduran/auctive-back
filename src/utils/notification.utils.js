@@ -77,7 +77,6 @@ const deleteAllNotifications = async (email) => {
 
 module.exports = {
     createNotification,
-    deleteNotification,
     deleteAllNotifications,
-    getAllNotifications
+    
 }
