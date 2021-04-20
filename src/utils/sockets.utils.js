@@ -219,8 +219,8 @@ const socketInit = (server) => {
 
         try {
             if (date < new Date()) {
-                console.log(auction);
-                const result = await closeAuction(auction);
+                await closeAuction(auction);
+                return;
             }
             schedule.scheduleJob(auction.auction_id, date, async () => {
                 await closeAuction(auction);

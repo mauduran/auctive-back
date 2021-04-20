@@ -38,6 +38,9 @@ const setUpDailySchedule = (cb) => {
     schedule.scheduleJob("daily-schedule", rule, () => getEventsForToday(cb));
 }
 
+
+
+
 module.exports = {
     getEventsForToday,
     setUpDailySchedule,
