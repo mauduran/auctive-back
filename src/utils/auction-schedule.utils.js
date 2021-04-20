@@ -8,7 +8,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 
-const getEventsForToday = () => {
+const getEventsForToday = (cb) => {
     let date = dateUtils.getTodayString();
 
     headers = { 'Content-Type': 'application/json', 'X-API-KEY': process.env.SERVERLESS_API_KEY }
@@ -20,7 +20,7 @@ const getEventsForToday = () => {
         .then(res => {
             const data = res.data;
             data.items.forEach(item => {
-                scheduleAuctionClose(item);
+                cb(item);
             });
             return data.items;
         })
@@ -30,17 +30,13 @@ const getEventsForToday = () => {
 }
 
 
-const cancelScheduledEvent = (auctionId) => {
-    schedule.scheduledJobs[auctionId].cancel();
-}
 
-
-const setUpDailySchedule = () => {
+const setUpDailySchedule = (cb) => {
     const rule = new schedule.RecurrenceRule();
     rule.hour = 0;
     rule.tz = 'America/New_York';
 
-    schedule.scheduleJob("daily-schedule", rule, getEventsForToday);
+    schedule.scheduleJob("daily-schedule", rule, ()=>getEventsForToday(cb));
 }
 
 const scheduleAuctionClose = (auction) => {
@@ -62,6 +58,5 @@ const scheduleAuctionClose = (auction) => {
 module.exports = {
     getEventsForToday,
     setUpDailySchedule,
-    cancelScheduledEvent,
     scheduleAuctionClose
 }

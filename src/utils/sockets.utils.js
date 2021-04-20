@@ -1,11 +1,18 @@
 const jwt = require("jsonwebtoken");
 const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
+const schedule = require('node-schedule');
+const axios = require('axios');
+const dateUtils = require('./date.utils');
 
-let io;
+if (process.env.NODE_ENV == 'dev') {
+    require('dotenv').config();
+}
+
+const headers = { 'Content-Type': 'application/json', 'X-API-KEY': process.env.SERVERLESS_API_KEY };
+
 const socketInit = (server) => {
-
-    io = socketIo(server, {
+    const io = socketIo(server, {
         cors: {
             origin: '*',
             methods: ['GET', 'POST'],
@@ -21,8 +28,7 @@ const socketInit = (server) => {
         socketUtils.addActiveUser(socket.id, userEmail);
 
         const verification = jwt.verify(user.session_token, process.env.TOKEN_SECRET);
-        // TODO: Check is user is Admin and join admin room.
-        if(verification.is_admin){
+        if (verification.is_admin) {
             socket.join('admin');
         } else {
             // Get user auctions and conversations
@@ -45,56 +51,157 @@ const socketInit = (server) => {
          Owner/AuctionWinner - End of auction (Expired, Closed)
         */
         socket.on('verify', async data => {
-            //Update dynamodb document.
+            const { verificationStatus, email } = data;
+            if (!verificationStatus || !email) return;
 
-            //SEND NOTIFICATION TO USER with new status and message.
+            const configParams = {
+                headers: { ...headers, Authorization: authToken }
+            }
+            axios.put(process.env.IBM_API_GATEWAY_URL, { verificationStatus, email }, configParams)
+                .then(res => {
+                    const userSocket = socketUtils.getSocketIdFromUser(email);
+                    const status = verificationStatus == 'ACCEPTED' ? 'accepted' : 'rejected';
+                    socket.to(userSocket).emit('verificationUpdate', { status, message: `Your verification request has been ${status}` });
+                })
+                .catch(err => {
+                    console.error(err);
+                })
         });
 
         socket.on('verificationRequest', async data => {
-            //After creating verificationRequest with lambda S3 image and dynamodb doc.
-            //Emit to admin room
+            io.to('admin').emit('newVerificationRequest');
         });
 
         socket.on('message', async data => {
-            //Add message document to dynamoDB
-            //Add message as last message on conversation Document (this two on same lambda)
-            //Emit message to user 
+
+            const { conversationId, messageBody, senderName, auctionId } = data;
+            if (!conversationId || !messageBody || !senderName || !auctionId) return;
+
+            const configParams = {
+                headers: { ...headers, Authorization: authToken }
+            }
+            axios.put(`${process.env.API_GATEWAY_URL}/conversations/addMessage`,
+                { conversationId, messageBody, senderName, auctionId },
+                configParams
+            ).then(res => {
+                const result = res.data;
+                socket.to(conversationId).emit(result);
+            }).catch(err => {
+                console.error(err);
+            })
+
         });
 
         socket.on('createConversation', async data => {
-            //Create conversation Document.
-            //SEND NOTIFICATION TO USER new conversation
-            //Emit notification to user.
+            const { auctionId, auctionOwnerEmail, auctionTitle } = body;
+            if (!auctionOwnerEmail || !auctionTitle || !senderName || !auctionId) return;
+
+            const configParams = {
+                headers: { ...headers, Authorization: authToken }
+            }
+
+            try {
+                const res = await axios.post(`${process.env.API_GATEWAY_URL}/conversations/create`,
+                    { auctionId, auctionOwnerEmail, auctionTitle },
+                    configParams
+                );
+
+                const conversation = res.data;
+
+                socket.join(conversation.conversation_id);
+                const socketId = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
+                if (socketId) {
+                    socket.to(socketId).emit('newConversation', { conversation })
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
         });
 
         socket.on('subscribeToConversation', async data => {
-
+            for (conversation of data.conversations) {
+                socket.join(conversation);
+            }
         });
 
         socket.on('subscribeToAuction', async data => {
-            //Call subscribeToAuctionLambda
-            //Join auction room
+            try {
+                const { auctionId } = data;
+
+                const configParams = {
+                    headers: { ...headers, Authorization: authToken }
+                }
+
+                await axios.post(`${process.env.API_GATEWAY_URL}/auctions/subscribe`,
+                    { auctionId },
+                    configParams
+                );
+
+                socket.join(data.auctionId);
+            } catch (error) {
+                console.log(error);
+            }
         });
 
         socket.on('newBid', async data => {
-            //Update auction document with new bid and email of biddder
-            //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
+            const { auctionId, bid, auctionOwnerEmail } = data;
+
+            if (!auctionId || !bid || !auctionOwnerEmail) return;
+
+            const configParams = {
+                headers: { ...headers, Authorization: authToken }
+            }
+
+            await axios.put(`${process.env.API_GATEWAY_URL}/auctions/newBid`,
+                { auctionId, bid, auctionOwnerEmail },
+                configParams
+            );
+
+
+            socket.to(auctionId).send("newBid", { auctionId, bid, auctionOwnerEmail });
+            const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
+            
+            //SEND NOTIFICATION TO OWNER  
+            //GET INTERESTED PEOPLE AND SEND NOTIFICATION
+            //SEND PHONE NOTIFICATION TO users with feature activated
         });
 
         socket.on('buyNow', async data => {
-            //Update auction document with bidWinner and change status to closed
+            const { auctionId, auctionOwnerEmail } = data;
+
+            if (!auctionId || !auctionOwnerEmail) return;
+
+            const configParams = {
+                headers: { ...headers, Authorization: authToken }
+            }
+
+            await axios.put(`${process.env.API_GATEWAY_URL}/auctions/newBid`,
+                { auctionId, auctionOwnerEmail },
+                configParams
+            );
+
+            io.to(auctionId).send("buyNow", { auctionId, auctionOwnerEmail });
+
+            const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
+            
+            // GET INTERESTED PEOPLE
             //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
+            schedule.scheduledJobs[data.auctionId].cancel();
         });
     });
+
+    const notifyEndOfAuction = (auction) => {
+
+        //Check if auction was closed or expired (Notify owner)
+        //Notify bid winner if one exists
+        //Notify all interested parties that auction has ended.
+    }
+
+    return { notifyEndOfAuction }
 }
 
-notifyEndOfAuction = (auction) => {
-    //Check if auction was closed or expired (Notify owner)
-    //Notify bid winner if one exists
-    //Notify all interested parties that auction has ended.
-}
 
 module.exports = {
-    socketInit,
-    notifyEndOfAuction
+    socketInit
 }

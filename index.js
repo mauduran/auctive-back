@@ -24,12 +24,11 @@ app.use('*', (req, res) => {
     res.status(404).json({ error: true, message: "Endpoint not found" });
 });
 
-scheduleUtils.getEventsForToday().then(console.log);
-scheduleUtils.setUpDailySchedule();
-
-
 const server = app.listen(PORT, () => {
     console.log("Server running on PORT " + PORT);
 })
 
-socketConfig.socketInit(server);
+const socketUtils = socketConfig.socketInit(server);
+
+scheduleUtils.getEventsForToday(socketUtils.notifyEndOfAuction);
+scheduleUtils.setUpDailySchedule(socketUtils.notifyEndOfAuction);
