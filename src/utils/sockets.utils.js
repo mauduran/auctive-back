@@ -113,6 +113,8 @@ const socketInit = (server) => {
                 if (socketId) {
                     socket.to(socketId).emit('newConversation', { conversation })
                 }
+
+
             } catch (error) {
                 console.log(error);
             }
@@ -125,6 +127,27 @@ const socketInit = (server) => {
             }
         });
 
+        socket.on('scheduleAuction', async auction => {
+            try {
+                const { auctionId, endDate, auctionOwnerEmail } = auction;
+
+                if (!auctionId || !endDate || !auctionOwnerEmail) return;
+
+                const configParams = {
+                    headers
+                }
+                const res = await axios.post(`${process.env.API_GATEWAY_URL}/scheduled-actions`,
+                    { auctionId, endDate, auctionOwnerEmail },
+                    configParams
+                );
+
+                schedule.scheduleJob(auction.auction_id, date, async () => {
+                    await closeAuction(auction);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        });
         socket.on('subscribeToAuction', async data => {
             try {
                 const { auctionId } = data;
@@ -161,7 +184,7 @@ const socketInit = (server) => {
 
             socket.to(auctionId).send("newBid", { auctionId, bid, auctionOwnerEmail });
             const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
-            
+
             //SEND NOTIFICATION TO OWNER  
             //GET INTERESTED PEOPLE AND SEND NOTIFICATION
             //SEND PHONE NOTIFICATION TO users with feature activated
@@ -184,18 +207,52 @@ const socketInit = (server) => {
             io.to(auctionId).send("buyNow", { auctionId, auctionOwnerEmail });
 
             const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
-            
+
             // GET INTERESTED PEOPLE
             //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
             schedule.scheduledJobs[data.auctionId].cancel();
         });
     });
 
-    const notifyEndOfAuction = (auction) => {
+    const notifyEndOfAuction = async (auction) => {
+        let date = new Date(auction.date);
 
-        //Check if auction was closed or expired (Notify owner)
-        //Notify bid winner if one exists
-        //Notify all interested parties that auction has ended.
+        try {
+            if (date < new Date()) {
+                console.log(auction);
+                const result = await closeAuction(auction);
+            }
+            schedule.scheduleJob(auction.auction_id, date, async () => {
+                await closeAuction(auction);
+            });
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    const closeAuction = async (auction) => {
+        const configParams = {
+            headers
+        }
+        try {
+            const res = await axios.post(
+                `${process.env.API_GATEWAY_URL}/auctions/close`,
+                { auctionId: auction.auction_id, auctionOwnerEmail: auction.owner_email },
+                configParams
+            )
+            const { bid_winner } = res.data;
+            io.to(auction.auction_id).emit('auctionClose', auction);
+
+            if (bid_winner) {
+                const socketId = socketUtils.getSocketIdFromUser(bid_winner);
+                if (socketId) io.to(socketId).emit('auctionWon', auction);
+            }
+        } catch (error) {
+            console.log(error);
+            return {}
+        }
+
     }
 
     return { notifyEndOfAuction }

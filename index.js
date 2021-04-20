@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
 const socketConfig = require('./src/utils/sockets.utils');
 const scheduleUtils = require('./src/utils/auction-schedule.utils');
 

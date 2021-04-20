@@ -1,14 +1,13 @@
 const schedule = require('node-schedule');
 const axios = require('axios');
 const dateUtils = require('./date.utils');
-const { notifyEndOfAuction } = require("./sockets.utils");
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
 }
 
 
-const getEventsForToday = (cb) => {
+const getEventsForToday = async (cb) => {
     let date = dateUtils.getTodayString();
 
     headers = { 'Content-Type': 'application/json', 'X-API-KEY': process.env.SERVERLESS_API_KEY }
@@ -16,6 +15,7 @@ const getEventsForToday = (cb) => {
     const configParams = {
         headers
     }
+
     return axios.get(`${process.env.API_GATEWAY_URL}/scheduled-actions`, configParams)
         .then(res => {
             const data = res.data;
@@ -30,33 +30,15 @@ const getEventsForToday = (cb) => {
 }
 
 
-
 const setUpDailySchedule = (cb) => {
     const rule = new schedule.RecurrenceRule();
     rule.hour = 0;
     rule.tz = 'America/New_York';
 
-    schedule.scheduleJob("daily-schedule", rule, ()=>getEventsForToday(cb));
-}
-
-const scheduleAuctionClose = (auction) => {
-    let date = new Date(auction.date);
-
-    if (auction.pending) {
-        if (date < new Date()) {
-            // TODO: AuctionUtils.AuctionClose
-            notifyEndOfAuction(auction);
-        }
-        schedule.scheduleJob(auction.auction_id, date, () => {
-            // TODO: AuctionUtils.AuctionClose (socketUtil)
-            notifyEndOfAuction(auction);
-        })
-    }
-
+    schedule.scheduleJob("daily-schedule", rule, () => getEventsForToday(cb));
 }
 
 module.exports = {
     getEventsForToday,
     setUpDailySchedule,
-    scheduleAuctionClose
 }
