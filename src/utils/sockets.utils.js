@@ -30,11 +30,7 @@ const socketInit = (server) => {
         const verification = jwt.verify(user.session_token, process.env.TOKEN_SECRET);
         if (verification.is_admin) {
             socket.join('admin');
-        } else {
-            // Get user auctions and conversations
-            //TODO: Join Auction rooms and conversations
         }
-
 
         socket.on('disconnect', () => {
             socketUtils.removeActiveUser(userEmail);
@@ -121,8 +117,8 @@ const socketInit = (server) => {
 
         });
 
-        socket.on('subscribeToConversation', async data => {
-            for (conversation of data.conversations) {
+        socket.on('subscribeToConversations', async data => {
+            for (let conversation of data.conversations) {
                 socket.join(conversation);
             }
         });
@@ -148,6 +144,13 @@ const socketInit = (server) => {
                 console.log(error);
             }
         });
+
+        socket.on('subscribeToAuctions', data => {
+            for(let auction of data.auctions) {
+                socket.join(auction);
+            }
+        })
+
         socket.on('subscribeToAuction', async data => {
             try {
                 const { auctionId } = data;
