@@ -248,6 +248,8 @@ const socketInit = (server) => {
                 const socketId = socketUtils.getSocketIdFromUser(bid_winner);
                 if (socketId) io.to(socketId).emit('auctionWon', auction);
             }
+
+            //Change status of Scheduled auction
         } catch (error) {
             console.log(error);
             return {}
