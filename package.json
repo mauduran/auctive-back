@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=dev node .",
+    "start": "node .",
     "dev": "NODE_ENV=dev nodemon .",
     "dev2": "SET NODE_ENV=dev nodemon index.js"
   },

@@ -6,17 +6,22 @@ const scheduleUtils = require('./src/utils/auction-schedule.utils');
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
+    console.log('dev');
 }
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+console.log("TOKEN")
+console.log(process.env.TOKEN_SECRET);
+console.log("SECRET")
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.json("Welcome"));
+app.get('/', (req, res) => res.json(process.env));
 app.use('/assets', express.static(path.join(__dirname, 'public')));
 
 app.use('*', (req, res) => {
