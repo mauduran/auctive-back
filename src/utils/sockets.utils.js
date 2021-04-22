@@ -16,18 +16,19 @@ const socketInit = (server) => {
         cors: {
             origin: '*',
             methods: ['GET', 'POST'],
-            allowedHeaders: ['Authorization', 'userId'],
+            allowedHeaders: ['Authorization', 'userEmail'],
             credentials: true
         }
     });
 
     io.on('connection', socket => {
         const authToken = socket.handshake.headers['authorization'];
-        const userEmail = socket.handshake.headers['userEmail'];
+        const userEmail = socket.handshake.headers['useremail'];
 
         socketUtils.addActiveUser(socket.id, userEmail);
 
-        const verification = jwt.verify(user.session_token, process.env.TOKEN_SECRET);
+        console.log("newConnection: ", userEmail);
+        const verification = jwt.verify(authToken, process.env.TOKEN_SECRET);
         if (verification.is_admin) {
             socket.join('admin');
         }
@@ -65,6 +66,7 @@ const socketInit = (server) => {
         });
 
         socket.on('verificationRequest', async data => {
+            console.log("new verification request!")
             io.to('admin').emit('newVerificationRequest');
         });
 
