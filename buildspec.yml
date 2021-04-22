@@ -5,6 +5,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
+      - echo "$(ls)"
       - $(aws ecr get-login-password --region $AWS_DEFAULT_REGION |  docker login --username AWS --password-stdin 187673598599.dkr.ecr.us-east-1.amazonaws.com)
       - REPOSITORY_URI=187673598599.dkr.ecr.us-east-1.amazonaws.com/auctive-back
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
@@ -13,7 +14,6 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - echo "$(ls)"
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
