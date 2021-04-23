@@ -125,30 +125,8 @@ const socketInit = (server) => {
             }
         });
 
-        socket.on('scheduleAuction', async auction => {
-            try {
-                const { auctionId, endDate, auctionOwnerEmail } = auction;
-
-                if (!auctionId || !endDate || !auctionOwnerEmail) return;
-
-                const configParams = {
-                    headers
-                }
-                const res = await axios.post(`${process.env.API_GATEWAY_URL}/scheduled-actions`,
-                    { auctionId, endDate, auctionOwnerEmail },
-                    configParams
-                );
-
-                schedule.scheduleJob(auction.auction_id, date, async () => {
-                    await closeAuction(auction);
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        });
-
         socket.on('subscribeToAuctions', data => {
-            for(let auction of data.auctions) {
+            for (let auction of data.auctions) {
                 socket.join(auction);
             }
         })
@@ -190,6 +168,7 @@ const socketInit = (server) => {
             socket.to(auctionId).send("newBid", { auctionId, bid, auctionOwnerEmail });
             const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
 
+            //Subscribe user to auction
             //SEND NOTIFICATION TO OWNER  
             //GET INTERESTED PEOPLE AND SEND NOTIFICATION
             //SEND PHONE NOTIFICATION TO users with feature activated
@@ -213,9 +192,40 @@ const socketInit = (server) => {
 
             const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
 
+            //Subscribe user to auction
             // GET INTERESTED PEOPLE
             //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
             schedule.scheduledJobs[data.auctionId].cancel();
+        });
+
+        socket.on('scheduleAuction', async auction => {
+            try {
+                const { auctionId, endDate, auctionOwnerEmail } = auction;
+
+                console.log(auction);
+
+                console.log("Scheduling!");
+
+                if (!auctionId || !endDate || !auctionOwnerEmail) return;
+
+                const configParams = {
+                    headers
+                }
+                const res = await axios.post(`${process.env.API_GATEWAY_URL}/scheduled-actions`,
+                    { auctionId, endDate, auctionOwnerEmail },
+                    configParams
+                );
+
+                console.log(auction);
+                schedule.scheduleJob(auction.auctionId, new Date(endDate), () => {
+                    closeAuction(auction);
+                });
+
+                console.log("Scheduled auction close");
+                
+            } catch (error) {
+                console.log(error);
+            }
         });
     });
 
@@ -223,7 +233,7 @@ const socketInit = (server) => {
         let date = new Date(auction.date);
 
         try {
-            if(auction.pending){
+            if (auction.pending) {
                 if (date < new Date()) {
                     await closeAuction(auction);
                     return;
@@ -242,6 +252,8 @@ const socketInit = (server) => {
         const configParams = {
             headers
         }
+
+        console.log("Closing auction");
         try {
             const res = await axios.post(
                 `${process.env.API_GATEWAY_URL}/auctions/close`,
@@ -255,6 +267,8 @@ const socketInit = (server) => {
                 const socketId = socketUtils.getSocketIdFromUser(bid_winner);
                 if (socketId) io.to(socketId).emit('auctionWon', auction);
             }
+
+            console.log("Auction closed");
 
         } catch (error) {
             console.log(error);
