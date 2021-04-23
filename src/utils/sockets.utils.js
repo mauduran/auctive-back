@@ -223,13 +223,15 @@ const socketInit = (server) => {
         let date = new Date(auction.date);
 
         try {
-            if (date < new Date()) {
-                await closeAuction(auction);
-                return;
+            if(auction.pending){
+                if (date < new Date()) {
+                    await closeAuction(auction);
+                    return;
+                }
+                schedule.scheduleJob(auction.auction_id, date, async () => {
+                    await closeAuction(auction);
+                });
             }
-            schedule.scheduleJob(auction.auction_id, date, async () => {
-                await closeAuction(auction);
-            });
         } catch (error) {
             console.log(error);
         }
@@ -254,7 +256,6 @@ const socketInit = (server) => {
                 if (socketId) io.to(socketId).emit('auctionWon', auction);
             }
 
-            //Change status of Scheduled auction
         } catch (error) {
             console.log(error);
             return {}
