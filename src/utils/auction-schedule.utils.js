@@ -19,8 +19,9 @@ const getEventsForToday = async (cb) => {
     return axios.get(`${process.env.API_GATEWAY_URL}/scheduled-actions`, configParams)
         .then(res => {
             const data = res.data;
+
             data.items.forEach(item => {
-                cb(item);
+                cb(item.auction_id, item.owner_email);
             });
             return data.items;
         })

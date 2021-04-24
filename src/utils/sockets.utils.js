@@ -202,7 +202,6 @@ const socketInit = (server) => {
             try {
                 const { auctionId, endDate, auctionOwnerEmail } = auction;
 
-                console.log("Scheduling!");
 
                 if (!auctionId || !endDate || !auctionOwnerEmail) return;
 
@@ -214,37 +213,39 @@ const socketInit = (server) => {
                     configParams
                 );
 
+                
+                const resAuction = res.data.auction;
+
                 schedule.scheduleJob(auction.auctionId, new Date(endDate), () => {
-                    closeAuction(res.auction);
+                    closeAuction(resAuction.auction_id, resAuction.owner_email);
                 });
 
-                console.log("Scheduled auction close");
-                
             } catch (error) {
                 console.log(error);
             }
         });
     });
 
-    const notifyEndOfAuction = async (auctionId,ownerEmail) => {
-        let date = new Date(auction.date);
-
+    const notifyEndOfAuction = async (auctionId, ownerEmail) => {
         try {
             const configParams = {
-                headers: { ...headers, Authorization: authToken }
+                headers: { ...headers }
             }
-            await axios.post(`${process.env.API_GATEWAY_URL}/scheduled-actions/${auctionId}`,
-                { auctionId },
+            let scheduledAuction = await axios.get(`${process.env.API_GATEWAY_URL}/scheduled-actions/${auctionId}`,
                 configParams
             );
 
-            if (auction.pending) {
-                if (date < new Date()) {
-                    await closeAuction({auctionId, ownerEmail});
+            scheduledAuction = scheduledAuction.data;
+
+            date = new Date(scheduledAuction.date);
+
+            if (scheduledAuction.scheduledAction.pending) {
+                if (date <= new Date()) {
+                    await closeAuction({ auctionId, ownerEmail });
                     return;
                 }
                 schedule.scheduleJob(auctionId, date, async () => {
-                    await closeAuction({ownerEmail});
+                    await closeAuction({ auctionId, ownerEmail });
                 });
             }
         } catch (error) {
@@ -266,7 +267,15 @@ const socketInit = (server) => {
                 configParams
             )
             const { bid_winner } = res.data;
-            io.to(auction.auctionId).emit('auctionClose', auction);
+
+            let auctionRes = await axios.get(
+                `${process.env.API_GATEWAY_URL}/auctions/get/${auction.auctionId}`,
+                configParams
+            )
+
+            auctionRes = auctionRes.data;
+
+            io.to(auction.auctionId).emit('auctionClose', auctionRes.auction);
 
             if (bid_winner) {
                 const socketId = socketUtils.getSocketIdFromUser(bid_winner);
@@ -279,7 +288,6 @@ const socketInit = (server) => {
             console.log(error);
             return {}
         }
-
     }
 
     return { notifyEndOfAuction }
