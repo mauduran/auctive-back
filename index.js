@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.json('Welcome my friend'));
+app.get('/', (req, res) => res.json({message:'Welcome my friend', env: proccess.env}));
 app.use('/assets', express.static(path.join(__dirname, 'public')));
 
 app.use('*', (req, res) => {
