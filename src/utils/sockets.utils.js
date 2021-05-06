@@ -136,6 +136,14 @@ const socketInit = (server) => {
             }
         })
 
+        socket.on('joinAuction', data => {
+            socket.join(data.auctionId);
+        });
+
+        socket.on('leaveAuction', data => {
+            socket.leave(data.auctionId);
+        });
+        
         socket.on('subscribeToAuction', async data => {
             try {
                 const { auctionId } = data;
