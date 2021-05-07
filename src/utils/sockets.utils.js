@@ -3,7 +3,6 @@ const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
 const schedule = require('node-schedule');
 const axios = require('axios').default;
-const dateUtils = require('./date.utils');
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
@@ -187,14 +186,16 @@ const socketInit = (server) => {
                     headers: { ...headers, Authorization: authToken }
                 }
     
-                await axios.put(`${process.env.API_GATEWAY_URL}/auctions/new-bid`,
+                let res = await axios.put(`${process.env.API_GATEWAY_URL}/auctions/new-bid`,
                     { auctionId, bid, auctionOwnerEmail },
                     configParams
                 );
     
-                console.log("New bid placed");
-                console.log(auctionId);
-                io.to(auctionId).emit("newBid", { auctionId, bid, auctionOwnerEmail });
+                
+                let current_bidder = res.data.current_auction.Attributes.current_bidder;
+
+                socket.join(auctionId);
+                io.to(auctionId).emit("newBid", { auctionId, bid, auctionOwnerEmail, current_bidder });
                 const owner = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
     
                 //Subscribe user to auction
@@ -223,7 +224,6 @@ const socketInit = (server) => {
                 let usersList = resGetUserByEmail.data.usersList;
 
                 //SEND PHONE NOTIFICATION TO users with feature activated
-                // let objectToSendMultipleSms = {};
                 let numberList = [];
                 usersList.forEach(element => {
                     if(element.notifications_enabled) {
@@ -236,6 +236,7 @@ const socketInit = (server) => {
                 
             } catch (error) {
                 console.log(error);
+                socket.emit('unsuccessfulBid', {});
             }
         });
 
@@ -351,10 +352,6 @@ const socketInit = (server) => {
 
     const closeAuction = async (auction) => {
         try {
-            console.log("Closing auction " + auction.auctionId);
-            console.log("Auction end date: " + auction.date.toISOString());
-            console.log("Current date: " + new Date().toISOString());
-
             const configParams = {
                 headers
             }
@@ -366,6 +363,10 @@ const socketInit = (server) => {
             scheduledAuction = scheduledAuction.data.scheduledAction;
 
             if (scheduledAuction.pending) {
+                console.log("Closing auction " + auction.auctionId);
+                console.log("Auction end date: " + auction.date.toISOString());
+                console.log("Current date: " + new Date().toISOString());
+    
                 const res = await axios.post(
                     `${process.env.API_GATEWAY_URL}/auctions/close`,
                     { auctionId: auction.auctionId, auctionOwnerEmail: auction.ownerEmail },
