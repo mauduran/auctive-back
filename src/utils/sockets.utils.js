@@ -16,7 +16,6 @@ const socketInit = (server) => {
             origin: '*',
             methods: ['GET', 'POST'],
             allowedHeaders: ['Authorization', 'userEmail'],
-            credentials: true
         }
     });
 
