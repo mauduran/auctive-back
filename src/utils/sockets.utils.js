@@ -256,21 +256,21 @@ const socketInit = (server) => {
                 configParams
             );
 
-            if(!res.data.succes) return;
+            if(!res.data.success) return;
 
-            let updatedAuction = res.data.current_auction.Attributes;
-            let current_bidder = updatedAuction.current_bidder;
+            let updatedAuction = res.data.closed_auction.Attributes;
+            let bid_winner = updatedAuction.bid_winner;
 
-            io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail });
+            io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail, bid_winner });
 
-            const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
+            const owner = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
             schedule.scheduledJobs[data.auctionId].cancel();
 
             //Subscribe user to auction
             await axios.post(`${process.env.API_GATEWAY_URL}/auctions/subscribe`, { "auctionId": auctionId }, configParams);
 
             //SEND NOTIFICATION TO OWNER  
-            socket.to(owner).emit("notification", { auctionId, bid, current_bidder});
+            socket.to(owner).emit("notification", { auctionId, bid:updatedAuction.current_price, current_bidder});
 
             // GET INTERESTED PEOPLE
             let resInterestedUsers = await axios.get(`${process.env.API_GATEWAY_URL}/auctions/interested/${auctionId}`, configParams);
@@ -301,6 +301,7 @@ const socketInit = (server) => {
             } catch (error) {
                 console.log("Error");
                 console.log(error);
+                socket.emit('unsuccessfulBuyNow', {});
             }
         });
 
