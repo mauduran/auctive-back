@@ -127,7 +127,7 @@ const socketInit = (server) => {
 
         socket.on('subscribeToAuctions', data => {
             for (let auction of data.auctions) {
-                socket.join(auction);
+                socket.join(auction.auction_id);
             }
         })
         socket.on('leaveAuctions', data => {
@@ -143,7 +143,7 @@ const socketInit = (server) => {
         socket.on('leaveAuction', data => {
             socket.leave(data.auctionId);
         });
-        
+
         socket.on('subscribeToAuction', async data => {
             try {
                 const { auctionId } = data;
@@ -166,25 +166,32 @@ const socketInit = (server) => {
         socket.on('newBid', async data => {
             const { auctionId, bid, auctionOwnerEmail } = data;
 
-            if (!auctionId || !bid || !auctionOwnerEmail) return;
+            try {
+                if (!auctionId || !bid || !auctionOwnerEmail) return;
 
-            const configParams = {
-                headers: { ...headers, Authorization: authToken }
+                const configParams = {
+                    headers: { ...headers, Authorization: authToken }
+                }
+    
+                await axios.put(`${process.env.API_GATEWAY_URL}/auctions/new-bid`,
+                    { auctionId, bid, auctionOwnerEmail },
+                    configParams
+                );
+    
+                console.log("New bid placed");
+                console.log(auctionId);
+                io.to(auctionId).emit("newBid", { auctionId, bid, auctionOwnerEmail });
+                const owner = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
+    
+                //Subscribe user to auction
+                //SEND NOTIFICATION TO OWNER  
+                //GET INTERESTED PEOPLE AND SEND NOTIFICATION
+                //SEND PHONE NOTIFICATION TO users with feature activated
+                
+            } catch (error) {
+                console.log(error);
             }
 
-            await axios.put(`${process.env.API_GATEWAY_URL}/auctions/newBid`,
-                { auctionId, bid, auctionOwnerEmail },
-                configParams
-            );
-
-
-            socket.to(auctionId).send("newBid", { auctionId, bid, auctionOwnerEmail });
-            const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
-
-            //Subscribe user to auction
-            //SEND NOTIFICATION TO OWNER  
-            //GET INTERESTED PEOPLE AND SEND NOTIFICATION
-            //SEND PHONE NOTIFICATION TO users with feature activated
         });
 
         socket.on('buyNow', async data => {
@@ -201,7 +208,7 @@ const socketInit = (server) => {
                 configParams
             );
 
-            io.to(auctionId).send("buyNow", { auctionId, auctionOwnerEmail });
+            io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail });
 
             const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
 
@@ -229,7 +236,6 @@ const socketInit = (server) => {
 
                 const resAuction = res.data.auction;
 
-                console.log(resAuction);
 
                 await notifyEndOfAuction(resAuction.auction_id, resAuction.owner_email, resAuction.date);
 
@@ -245,12 +251,12 @@ const socketInit = (server) => {
             date = new Date(date);
 
             if (date <= new Date()) {
-                await closeAuction({ auctionId, ownerEmail });
+                await closeAuction({ auctionId, ownerEmail,date });
                 return;
             }
 
             schedule.scheduleJob(auctionId, date, async () => {
-                await closeAuction({ auctionId, ownerEmail });
+                await closeAuction({ auctionId, ownerEmail,date });
             });
 
         } catch (error) {
@@ -260,6 +266,9 @@ const socketInit = (server) => {
 
     const closeAuction = async (auction) => {
         try {
+            console.log("Closing auction " + auction.auctionId);
+            console.log("Auction end date: " + auction.date.toISOString());
+            console.log("Current date: " + new Date().toISOString());
 
             const configParams = {
                 headers
