@@ -11,6 +11,48 @@ if (process.env.NODE_ENV == 'dev') {
 
 const headers = { 'Content-Type': 'application/json', 'X-API-KEY': process.env.SERVERLESS_API_KEY };
 
+const subscribeAndSendSMS = async (current_bidder, auctionId, owner, configParams, message) => {
+    let res = false;
+    try {
+        //Subscribe user to auction
+        await axios.post(`${process.env.API_GATEWAY_URL}/auctions/subscribe`, { "auctionId": auctionId }, configParams);
+        
+        //SEND NOTIFICATION TO OWNER  
+        socket.to(owner).emit("notification", { auctionId, current_bidder});
+
+        //GET INTERESTED PEOPLE AND SEND NOTIFICATION
+        let resInterestedUsers = await axios.get(`${process.env.API_GATEWAY_URL}/auctions/interested/${auctionId}`, configParams);
+        if(!resInterestedUsers.data.success ) return;
+
+        let interestedUsers = resInterestedUsers.data.users || [] ;
+
+        interestedUsers = interestedUsers.map((element) => {
+            return `"${element.interested_user}"`;                                // tiene que ser un arreglo así ["mau4-duran@hotmail.com", "darealkanye@west.com"]
+        });
+
+        let resGetUserByEmail = await axios.get(`${process.env.API_GATEWAY_URL}/users/emailList?list=${JSON.stringify(interestedUsers)}`, configParams);
+        if(!resGetUserByEmail.data.success ) return;
+        
+        let usersList = resGetUserByEmail.data.usersList;
+
+        //SEND PHONE NOTIFICATION TO users with feature activated
+        
+        let numberList = [];
+        usersList.forEach(element => {
+            if(element.notifications_enabled) {
+                numberList.push({"Message" : message, "PhoneNumber" : element.phone_number})
+            }
+
+        });
+
+        await axios.post(`${process.env.API_GATEWAY_URL}/send-multiple-sms`, {"numberList" : numberList}, configParams) 
+        return true;           
+    } catch (error) {
+        console.log(error);
+        return true;
+    }
+
+}
 const socketInit = (server) => {
     const io = socketIo(server, {
         cors: {
@@ -59,6 +101,10 @@ const socketInit = (server) => {
                 const status = verificationStatus == 'ACCEPTED' ? 'accepted' : 'rejected';
                 
                 socket.to(userSocket).emit('verificationUpdate', { status, message: `Your verification request has been ${status}` });
+                
+                socket.to(userSocket).emit('notification', { type: "Verification", message: "New notification" });
+
+
                 // Get user
                 let userResponse = await axios.get(process.env.API_GATEWAY_URL + `/users/emailList?list=["${email}"]`, configParams);
                 if(!userResponse.data.success)  return;
@@ -198,103 +244,49 @@ const socketInit = (server) => {
 
                 socket.to(auctionId).emit("newBid", { auctionId, bid, auctionOwnerEmail });   
                                                           // ask: preguntar como funciona
-                const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
+                const owner = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
+                // const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
     
-                
-                //Subscribe user to auction
-                await axios.post(`${process.env.API_GATEWAY_URL}/auctions/subscribe`, { "auctionId": auctionId }, configParams);
-                
-                //SEND NOTIFICATION TO OWNER  
-                socket.to(owner).emit("notification", { auctionId, bid, current_bidder});
-
-                //GET INTERESTED PEOPLE AND SEND NOTIFICATION
-                let resInterestedUsers = await axios.get(`${process.env.API_GATEWAY_URL}/auctions/interested/${auctionId}`, configParams);
-                if(!resInterestedUsers.data.success ) return;
-
-                let interestedUsers = resInterestedUsers.data.users || [] ;
-
-                interestedUsers = interestedUsers.map((element) => {
-                    return `"${element.interested_user}"`;                                // tiene que ser un arreglo así ["mau4-duran@hotmail.com", "darealkanye@west.com"]
-                });
-
-                let resGetUserByEmail = await axios.get(`${process.env.API_GATEWAY_URL}/users/emailList?list=${JSON.stringify(interestedUsers)}`, configParams);
-                if(!resGetUserByEmail.data.success ) return;
-                
-                let usersList = resGetUserByEmail.data.usersList;
-
-                //SEND PHONE NOTIFICATION TO users with feature activated
-                // let objectToSendMultipleSms = {};
-                let numberList = [];
-                usersList.forEach(element => {
-                    if(element.notifications_enabled) {
-                        numberList.push({"Message" : "Alguien ha pujado la subasta!", "PhoneNumber" : element.phone_number})
-                    }
-
-                });
-
-                await axios.post(`${process.env.API_GATEWAY_URL}/send-multiple-sms`, {"numberList" : numberList}, configParams)
-                
+                let flag = await subscribeAndSendSMS(current_bidder, auctionId, owner, configParams, "Alguien ha pujado la subasta");
+                if(flag) return {message: "ok!"};
             } catch (error) {
                 console.log(error);
             }
         });
 
         socket.on('buyNow', async data => {
-            const { auctionId, auctionOwnerEmail } = data;
+            try {
+                const { auctionId, auctionOwnerEmail } = data;
 
-            if (!auctionId || !auctionOwnerEmail) return;
-
-            const configParams = {
-                headers: { ...headers, Authorization: authToken }
-            }
-
-            let res = await axios.put(`${process.env.API_GATEWAY_URL}/auctions/buy-now`,
-                { auctionId, auctionOwnerEmail },
-                configParams
-            );
-
-            if(!res.data.succes) return;
-
-            let updatedAuction = res.data.current_auction.Attributes;
-            let current_bidder = updatedAuction.current_bidder;
-
-            io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail });
-
-            const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
-
-            //Subscribe user to auction
-            await axios.post(`${process.env.API_GATEWAY_URL}/auctions/subscribe`, { "auctionId": auctionId }, configParams);
-
-            //SEND NOTIFICATION TO OWNER  
-            socket.to(owner).emit("notification", { auctionId, bid, current_bidder});
-
-            // GET INTERESTED PEOPLE
-            let resInterestedUsers = await axios.get(`${process.env.API_GATEWAY_URL}/auctions/interested/${auctionId}`, configParams);
-            if(!resInterestedUsers.data.success ) return;
-
-            let interestedUsers = resInterestedUsers.data.users || [] ;
-
-            interestedUsers = interestedUsers.map((element) => {
-                return `"${element.interested_user}"`;                                // tiene que ser un arreglo así ["mau4-duran@hotmail.com", "darealkanye@west.com"]
-            });
-
-            let resGetUserByEmail = await axios.get(`${process.env.API_GATEWAY_URL}/users/emailList?list=${JSON.stringify(interestedUsers)}`, configParams);
-            if(!resGetUserByEmail.data.success ) return;
-            
-            let usersList = resGetUserByEmail.data.usersList;
-
-
-            //SEND NOTIFICATION TO OWNER AND INTERESTED PEOPLE
-            let numberList = [];
-            usersList.forEach(element => {
-                if(element.notifications_enabled) {
-                    numberList.push({"Message" : "Alguien ha pujado la subasta!", "PhoneNumber" : element.phone_number})
+                if (!auctionId || !auctionOwnerEmail) return;
+    
+                const configParams = {
+                    headers: { ...headers, Authorization: authToken }
                 }
-            });
-
-            await axios.post(`${process.env.API_GATEWAY_URL}/send-multiple-sms`, {"numberList" : numberList}, configParams)
-
-            schedule.scheduledJobs[data.auctionId].cancel();
+    
+                let res = await axios.put(`${process.env.API_GATEWAY_URL}/auctions/buy-now`,
+                    { auctionId, auctionOwnerEmail },
+                    configParams
+                );
+    
+                if(!res.data.succes) return;
+    
+                let updatedAuction = res.data.current_auction.Attributes;
+                let current_bidder = updatedAuction.current_bidder;
+    
+                io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail });
+    
+                const owner = socketUtils.getSocketIdFromUser(auctionOwnerEmail);
+                // const owner = socketUtils.getSocketIdFromUser(auction.owner_email);
+    
+                let flag = await subscribeAndSendSMS(current_bidder, auctionId, owner, configParams, "Alguien ha ganado la subasta!");
+                
+                if(flag) return {message: "ok!"};
+    
+                schedule.scheduledJobs[data.auctionId].cancel();                
+            } catch (error) {
+                console.log(error);
+            }
         });
 
         socket.on('scheduleAuction', async auction => {
