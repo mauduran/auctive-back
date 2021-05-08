@@ -14,4 +14,4 @@ EXPOSE 3000
 
 COPY . .
 
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "npm", "run", "dev" ]
