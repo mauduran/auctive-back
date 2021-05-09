@@ -384,8 +384,6 @@ const socketInit = (server) => {
 
             await Promise.all(notificationReqs);
 
-
-
             let resGetUserByEmail = await axios.get(`${process.env.API_GATEWAY_URL}/users/emailList?list=[${interestedUsers.map(usr => `"${usr}"`).join(',')}]`, configParams);
             if (!resGetUserByEmail.data.success) return;
 
