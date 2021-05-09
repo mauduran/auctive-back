@@ -202,7 +202,7 @@ const socketInit = (server) => {
                 io.to(auctionId).emit("newBid", { auctionId, bid, auctionOwnerEmail, current_bidder });
 
 
-                await axios.post(`http://localhost:4000/dev/notifications/create`,
+                await axios.post(`${process.env.API_GATEWAY_URL}/notifications/create`,
                     { email: auctionOwnerEmail, auctionId, auctionTitle: updatedAuction.title, message: `Somebody has made a bid on auction ${auctionId}` },
                     configParams
                 );
