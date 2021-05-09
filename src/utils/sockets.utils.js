@@ -3,7 +3,6 @@ const socketIo = require('socket.io');
 const socketUtils = require('./socket-dictionary.utils');
 const schedule = require('node-schedule');
 const axios = require('axios').default;
-const dateUtils = require('./date.utils');
 
 if (process.env.NODE_ENV == 'dev') {
     require('dotenv').config();
@@ -59,7 +58,6 @@ const socketInit = (server) => {
             origin: '*',
             methods: ['GET', 'POST'],
             allowedHeaders: ['Authorization', 'userEmail'],
-            credentials: true
         }
     });
 
@@ -187,7 +185,7 @@ const socketInit = (server) => {
 
         socket.on('subscribeToAuctions', data => {
             for (let auction of data.auctions) {
-                socket.join(auction);
+                socket.join(auction.auction_id);
             }
         })
         socket.on('leaveAuctions', data => {
@@ -203,7 +201,7 @@ const socketInit = (server) => {
         socket.on('leaveAuction', data => {
             socket.leave(data.auctionId);
         });
-        
+
         socket.on('subscribeToAuction', async data => {
             try {
                 const { auctionId } = data;
@@ -228,12 +226,12 @@ const socketInit = (server) => {
                 const { auctionId, bid, auctionOwnerEmail } = data;
 
                 if (!auctionId || !bid || !auctionOwnerEmail) return;
-    
+
                 const configParams = {
                     headers: { ...headers, Authorization: authToken }
                 }
     
-                let res = await axios.put(`${process.env.API_GATEWAY_URL}/auctions/newBid`,
+                let res = await axios.put(`${process.env.API_GATEWAY_URL}/auctions/new-bid`,
                     { auctionId, bid, auctionOwnerEmail },
                     configParams
                 );
@@ -251,6 +249,7 @@ const socketInit = (server) => {
                 if(flag) return {message: "ok!"};
             } catch (error) {
                 console.log(error);
+                socket.emit('unsuccessfulBid', {});
             }
         });
 
@@ -307,7 +306,6 @@ const socketInit = (server) => {
 
                 const resAuction = res.data.auction;
 
-                console.log(resAuction);
 
                 await notifyEndOfAuction(resAuction.auction_id, resAuction.owner_email, resAuction.date);
 
@@ -323,12 +321,12 @@ const socketInit = (server) => {
             date = new Date(date);
 
             if (date <= new Date()) {
-                await closeAuction({ auctionId, ownerEmail });
+                await closeAuction({ auctionId, ownerEmail,date });
                 return;
             }
 
             schedule.scheduleJob(auctionId, date, async () => {
-                await closeAuction({ auctionId, ownerEmail });
+                await closeAuction({ auctionId, ownerEmail,date });
             });
 
         } catch (error) {
@@ -338,7 +336,6 @@ const socketInit = (server) => {
 
     const closeAuction = async (auction) => {
         try {
-
             const configParams = {
                 headers
             }
@@ -350,6 +347,10 @@ const socketInit = (server) => {
             scheduledAuction = scheduledAuction.data.scheduledAction;
 
             if (scheduledAuction.pending) {
+                console.log("Closing auction " + auction.auctionId);
+                console.log("Auction end date: " + auction.date.toISOString());
+                console.log("Current date: " + new Date().toISOString());
+    
                 const res = await axios.post(
                     `${process.env.API_GATEWAY_URL}/auctions/close`,
                     { auctionId: auction.auctionId, auctionOwnerEmail: auction.ownerEmail },

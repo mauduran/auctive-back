@@ -21,7 +21,7 @@ const getEventsForToday = async (cb) => {
             const data = res.data;
 
             data.items.forEach(item => {
-                cb(item.auction_id, item.owner_email);
+                cb(item.auction_id, item.owner_email, item.date);
             });
             return data.items;
         })
