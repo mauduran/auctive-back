@@ -242,7 +242,7 @@ const socketInit = (server) => {
 
                 if (schedule.scheduledJobs[data.auctionId])
                     schedule.scheduledJobs[data.auctionId].cancel();
-            
+
                 console.log(auctionId);
 
                 io.to(auctionId).emit("buyNow", { auctionId, auctionOwnerEmail, bid_winner });
@@ -342,7 +342,7 @@ const socketInit = (server) => {
 
                 auctionRes = auctionRes.data;
 
-                io.to(auction.auctionId).emit('auctionClose', auctionRes.auction);
+                io.to(auction.auctionId).emit('auctionClose', { auctionId: auction.auctionId });
 
                 if (bid_winner) {
                     const socketId = socketUtils.getSocketIdFromUser(bid_winner);
